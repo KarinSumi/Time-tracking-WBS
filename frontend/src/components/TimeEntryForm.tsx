@@ -4,10 +4,32 @@ const TimeEntryForm: React.FC = () => {
   const [hours, setHours] = useState('');
   const [description, setDescription] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log({ hours, description });
-    alert(`Entry logged: ${hours} hours for "${description}"`);
+    
+    try {
+      const response = await fetch('/api/entries', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          hours: parseFloat(hours),
+          taskDescription: description,
+          userId: 'test-user-id', // Placeholder until auth is implemented
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        alert(`Entry logged successfully! ID: ${data.id}`);
+        setHours('');
+        setDescription('');
+      } else {
+        alert('Failed to log entry.');
+      }
+    } catch (error) {
+      console.error('Error logging entry:', error);
+      alert('An error occurred while logging entry.');
+    }
   };
 
   return (

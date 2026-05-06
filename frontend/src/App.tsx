@@ -1,9 +1,19 @@
+import React, { useState, useEffect } from 'react';
 import TimeEntryForm from './components/TimeEntryForm'
 import AuditInspector from './components/AuditInspector'
 import Dashboard from './components/Dashboard'
 import './App.css'
 
 function App() {
+  const [entries, setEntries] = useState([]);
+  
+  useEffect(() => {
+    fetch('/api/entries')
+      .then(res => res.json())
+      .then(data => setEntries(data))
+      .catch(err => console.error('Failed to fetch entries:', err));
+  }, []);
+
   const mockLogs = [
     {
       id: '1',
@@ -28,7 +38,7 @@ function App() {
           </section>
 
           <section>
-            <Dashboard />
+            <Dashboard entries={entries} />
           </section>
 
           <section>
