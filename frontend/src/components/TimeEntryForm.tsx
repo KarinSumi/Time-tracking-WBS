@@ -14,13 +14,13 @@ const TimeEntryForm: React.FC = () => {
         body: JSON.stringify({
           hours: parseFloat(hours),
           taskDescription: description,
-          userId: 'test-user-id', // Placeholder until auth is implemented
+          userId: 'test-user-id',
         }),
       });
 
       if (response.ok) {
         const data = await response.json();
-        alert(`Entry logged successfully! ID: ${data.id}`);
+        alert(`Entry logged successfully!`);
         setHours('');
         setDescription('');
       } else {
@@ -33,37 +33,36 @@ const TimeEntryForm: React.FC = () => {
   };
 
   return (
-    <div className="p-6 max-w-md mx-auto bg-white rounded-xl shadow-md space-y-4 border border-gray-200">
-      <h2 className="text-xl font-bold text-gray-900">Log Your Time</h2>
-      <form onSubmit={handleSubmit} className="space-y-4">
+    <div className="p-8 bg-white/80 backdrop-blur-xl rounded-apple shadow-apple border border-white/20">
+      <h2 className="text-lg font-semibold text-gray-900 tracking-tight mb-6">Log Hours</h2>
+      <form onSubmit={handleSubmit} className="space-y-6">
         <div>
-          <label className="block text-sm font-medium text-gray-700">Hours</label>
+          <label className="block text-[10px] font-bold text-apple-gray-500 uppercase tracking-widest mb-1.5 ml-1">Duration</label>
           <input
             type="number"
             step="0.5"
             value={hours}
             onChange={(e) => setHours(e.target.value)}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"
-            placeholder="e.g. 8"
+            className="block w-full rounded-xl bg-apple-gray-50 border-transparent focus:bg-white focus:ring-2 focus:ring-apple-blue transition-all duration-200 text-sm p-3"
+            placeholder="8.0"
             required
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700">Task Description</label>
+          <label className="block text-[10px] font-bold text-apple-gray-500 uppercase tracking-widest mb-1.5 ml-1">Task</label>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"
+            className="block w-full rounded-xl bg-apple-gray-50 border-transparent focus:bg-white focus:ring-2 focus:ring-apple-blue transition-all duration-200 text-sm p-3 min-h-[100px]"
             placeholder="What did you work on?"
-            rows={3}
             required
           />
         </div>
         <button
           type="submit"
-          className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          className="w-full py-3 px-4 bg-apple-blue text-white rounded-xl font-semibold text-sm shadow-apple hover:opacity-90 active:scale-[0.98] transition-all duration-200"
         >
-          Submit Entry
+          Submit
         </button>
       </form>
     </div>

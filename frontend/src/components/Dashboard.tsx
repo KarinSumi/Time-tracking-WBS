@@ -2,25 +2,25 @@ import React from 'react';
 
 const Dashboard: React.FC<{ entries: any[] }> = ({ entries }) => {
   return (
-    <div className="mt-8 bg-white p-6 rounded-xl shadow-md border border-gray-200">
-      <h2 className="text-xl font-bold mb-4">Hierarchical Productivity Roll-up</h2>
-      <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+    <div className="p-8 bg-white/80 backdrop-blur-xl rounded-apple shadow-apple border border-white/20">
+      <h2 className="text-lg font-semibold text-gray-900 tracking-tight mb-6">Team Activity</h2>
+      <div className="overflow-hidden">
+        <table className="min-w-full divide-y divide-apple-gray-100">
+          <thead>
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hours</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+              <th className="px-4 py-3 text-left text-[10px] font-bold text-apple-gray-500 uppercase tracking-widest">User</th>
+              <th className="px-4 py-3 text-left text-[10px] font-bold text-apple-gray-500 uppercase tracking-widest">Description</th>
+              <th className="px-4 py-3 text-left text-[10px] font-bold text-apple-gray-500 uppercase tracking-widest">Hours</th>
+              <th className="px-4 py-3 text-left text-[10px] font-bold text-apple-gray-500 uppercase tracking-widest">Date</th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className="divide-y divide-apple-gray-50">
             {entries.map((entry, idx) => (
-              <tr key={entry.id || idx}>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{entry.userId}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{entry.taskDescription}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{entry.hours}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{new Date(entry.date).toLocaleDateString()}</td>
+              <tr key={entry.id || idx} className="hover:bg-apple-gray-50/50 transition-colors duration-150">
+                <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{entry.userId.split('-')[0]}</td>
+                <td className="px-4 py-4 text-sm text-apple-gray-500">{entry.taskDescription}</td>
+                <td className="px-4 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">{entry.hours}h</td>
+                <td className="px-4 py-4 whitespace-nowrap text-sm text-apple-gray-400">{new Date(entry.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</td>
               </tr>
             ))}
           </tbody>
