@@ -1,0 +1,72 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Organization {
+  id        String   @id @default(uuid())
+  name      String
+  parentId  String?
+  parent    Organization? @relation("OrgToOrg", fields: [parentId], references: [id])
+  children  Organization[] @relation("OrgToOrg")
+  users     User[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model User {
+  id           String       @id @default(uuid())
+  email        String       @unique
+  passwordHash String
+  orgId        String
+  organization Organization @relation(fields: [orgId], references: [id])
+  role         Role         @default(USER)
+  timeEntries  TimeEntry[]
+  auditLogs    AuditLog[]
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+}
+
+enum Role {
+  ADMIN
+  MANAGER
+  USER
+}
+
+model TimeEntry {
+  id              String      @id @default(uuid())
+  userId          String
+  user            User        @relation(fields: [userId], references: [id])
+  date            DateTime
+  hours           Decimal
+  taskDescription String
+  status          EntryStatus @default(DRAFT)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+}
+
+enum EntryStatus {
+  DRAFT
+  SUBMITTED
+}
+
+model AuditLog {
+  id           String   @id @default(uuid())
+  entityType   String
+  entityId     String
+  action       Action
+  performedBy  String
+  user         User     @relation(fields: [performedBy], references: [id])
+  oldValues    Json?
+  newValues    Json?
+  timestamp    DateTime @default(now())
+}
+
+enum Action {
+  CREATE
+  UPDATE
+  DELETE
+}
