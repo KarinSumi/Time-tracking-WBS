@@ -7,9 +7,13 @@ const TimeEntryForm: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      const token = localStorage.getItem('auth_token');
       const response = await fetch('/api/entries', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({
           hours: parseFloat(hours),
           taskDescription: description,
@@ -24,14 +28,14 @@ const TimeEntryForm: React.FC = () => {
       } else {
         alert('Failed to log entry.');
       }
-    } catch (error) {
+    } catch {
       alert('An error occurred while logging entry.');
     }
   };
 
   return (
     <div className="h-full flex flex-col justify-center">
-      <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-4 ml-1">Quick Log</label>
+      <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-6 ml-1">Quick Log</label>
       <form onSubmit={handleSubmit} className="flex flex-col md:flex-row gap-4 items-end">
         <div className="flex-1 w-full">
           <input

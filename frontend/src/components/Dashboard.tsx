@@ -1,16 +1,24 @@
 import React from 'react';
 
-const Dashboard: React.FC<{ entries: any[] }> = ({ entries }) => {
+export interface TimeEntry {
+  id?: string;
+  taskDescription: string;
+  hours: number;
+  userId: string;
+  date: string;
+}
+
+const Dashboard: React.FC<{ entries: TimeEntry[] }> = ({ entries }) => {
   return (
     <div className="h-full flex flex-col">
-      <h2 className="text-xs font-bold text-white/40 uppercase tracking-widest mb-6">Team Activity</h2>
+      <h2 className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-6 ml-1">Team Activity</h2>
       <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
         <div className="space-y-4">
           {entries.map((entry, idx) => (
-            <div key={entry.id || idx} className="flex items-center justify-between group p-2 rounded-xl transition-all duration-200 hover:bg-white/5">
+            <div key={entry.id || idx} className="flex items-center justify-between group p-2 rounded-xl transition-all duration-200 group-hover:bg-white/10">
               <div className="flex flex-col">
                 <span className="text-sm font-medium text-white group-hover:text-white transition-colors">{entry.taskDescription}</span>
-                <span className="text-[10px] text-white/60 font-medium uppercase tracking-tight">{entry.userId.split('-')[0]} • {new Date(entry.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span>
+                <span className="text-[10px] text-white/60 font-medium uppercase tracking-tight">{entry.userId?.split('-')[0] || 'Unknown'} • {new Date(entry.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span>
               </div>
               <span className="text-sm font-semibold text-white tabular-nums bg-white/10 px-2 py-1 rounded-lg group-hover:bg-white/20 transition-colors">{entry.hours}h</span>
             </div>
