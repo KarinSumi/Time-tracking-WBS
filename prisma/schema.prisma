@@ -14,39 +14,102 @@ model Organization {
   parent    Organization? @relation("OrgToOrg", fields: [parentId], references: [id])
   children  Organization[] @relation("OrgToOrg")
   users     User[]
+  projects  Project[]
+  phases    Phase[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model User {
-  id           String       @id @default(uuid())
-  email        String       @unique
-  passwordHash String
-  orgId        String
-  organization Organization @relation(fields: [orgId], references: [id])
-  role         Role         @default(USER)
-  timeEntries  TimeEntry[]
-  auditLogs    AuditLog[]
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @updatedAt
+  id             String        @id @default(uuid())
+  email          String        @unique
+  name           String?
+  avatarUrl      String?
+  passwordHash   String
+  orgId          String
+  organization   Organization  @relation(fields: [orgId], references: [id])
+  role           Role          @default(USER)
+  timeEntries    TimeEntry[]
+  auditLogs      AuditLog[]
+  assignedPlans  PlannedTask[] @relation("AssignedTasks")
+  createdPlans   PlannedTask[] @relation("CreatedPlans")
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
 }
 
 enum Role {
+  SUPER_ADMIN
   ADMIN
   MANAGER
   USER
 }
 
-model TimeEntry {
+model Project {
+  id           String        @id @default(uuid())
+  name         String
+  color        String        @default("#3b82f6")
+  status       String        @default("ACTIVE")
+  orgId        String
+  organization Organization  @relation(fields: [orgId], references: [id])
+  timeEntries  TimeEntry[]
+  plannedTasks PlannedTask[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+model Phase {
+  id           String        @id @default(uuid())
+  name         String
+  sortOrder    Int           @default(0)
+  orgId        String
+  organization Organization  @relation(fields: [orgId], references: [id])
+  timeEntries  TimeEntry[]
+  plannedTasks PlannedTask[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+model PlannedTask {
   id              String      @id @default(uuid())
+  assigneeId      String
+  assignee        User        @relation("AssignedTasks", fields: [assigneeId], references: [id])
+  assignedById    String
+  assignedBy      User        @relation("CreatedPlans", fields: [assignedById], references: [id])
+  projectId       String?
+  project         Project?    @relation(fields: [projectId], references: [id])
+  phaseId         String?
+  phase           Phase?      @relation(fields: [phaseId], references: [id])
+  taskDescription String
+  plannedHours    Decimal
+  plannedDate     DateTime
+  status          PlanStatus  @default(PENDING)
+  timeEntries     TimeEntry[]
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+}
+
+enum PlanStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+}
+
+model TimeEntry {
+  id              String       @id @default(uuid())
   userId          String
-  user            User        @relation(fields: [userId], references: [id])
+  user            User         @relation(fields: [userId], references: [id])
+  projectId       String?
+  project         Project?     @relation(fields: [projectId], references: [id])
+  phaseId         String?
+  phase           Phase?       @relation(fields: [phaseId], references: [id])
+  plannedTaskId   String?
+  plannedTask     PlannedTask? @relation(fields: [plannedTaskId], references: [id])
   date            DateTime
   hours           Decimal
   taskDescription String
-  status          EntryStatus @default(DRAFT)
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
+  status          EntryStatus  @default(DRAFT)
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
 }
 
 enum EntryStatus {
