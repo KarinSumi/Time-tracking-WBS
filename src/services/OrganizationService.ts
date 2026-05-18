@@ -1,17 +1,47 @@
 import prisma from '../lib/prisma';
-import { Prisma } from '@prisma/client';
+import { UserContext } from './TimeEntryService';
+import { createAuditLog } from '../utils/utils';
 
-export async function getOrganizationSubtree(orgId: string): Promise<string[]> {
-  const query = Prisma.sql`
-    WITH RECURSIVE org_tree AS (
-      SELECT id FROM "Organization" WHERE id = ${orgId}
-      UNION ALL
-      SELECT o.id FROM "Organization" o
-      INNER JOIN org_tree ot ON o."parentId" = ot.id
-    )
-    SELECT id FROM org_tree;
-  `;
+export async function getSettings(orgId: string) {
+  const org = await prisma.organization.findUnique({
+    where: { id: orgId }
+  });
+  if (!org) throw new Error('Organization not found');
+  
+  return { 
+    id: org.id, 
+    name: org.name,
+    brandColor: org.brandColor,
+    logoUrl: org.logoUrl,
+    standardWorkingHours: 8.0
+  };
+}
 
-  const results = await prisma.$queryRaw<{ id: string }[]>(query);
-  return results.map(row => row.id);
+export async function updateSettings(data: any, context: UserContext) {
+  if (context.role !== 'ADMIN' && context.role !== 'SUPER_ADMIN') {
+    throw new Error('Unauthorized');
+  }
+
+  const oldOrg = await prisma.organization.findUnique({ where: { id: context.orgId } });
+  if (!oldOrg) throw new Error('Organization not found');
+
+  const updated = await prisma.organization.update({
+    where: { id: context.orgId },
+    data: { 
+      ...(data.name && { name: data.name }),
+      ...(data.brandColor && { brandColor: data.brandColor }),
+      ...(data.logoUrl !== undefined && { logoUrl: data.logoUrl })
+    }
+  });
+
+  await createAuditLog(prisma, {
+    entityType: 'Organization',
+    entityId: context.orgId,
+    action: 'UPDATE_SETTINGS',
+    performedBy: context.userId,
+    oldValues: oldOrg as any,
+    newValues: updated as any
+  });
+
+  return updated;
 }

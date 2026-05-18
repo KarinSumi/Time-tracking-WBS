@@ -6,10 +6,11 @@ const JWT_SECRET = process.env.JWT_SECRET || 'aion-dev-secret-key-change-in-prod
 export interface AuthRequest extends Request {
   userId?: string;
   userRole?: string;
+  orgId?: string;
 }
 
-export function generateToken(userId: string, role: string): string {
-  return jwt.sign({ userId, role }, JWT_SECRET, { expiresIn: '7d' });
+export function generateToken(userId: string, role: string, orgId: string): string {
+  return jwt.sign({ userId, role, orgId }, JWT_SECRET, { expiresIn: '7d' });
 }
 
 export function authMiddleware(req: AuthRequest, res: Response, next: NextFunction): void {
@@ -23,9 +24,16 @@ export function authMiddleware(req: AuthRequest, res: Response, next: NextFuncti
   const token = authHeader.split(' ')[1];
 
   try {
-    const decoded = jwt.verify(token!, JWT_SECRET) as { userId: string; role: string };
+    const decoded = jwt.verify(token!, JWT_SECRET) as { userId: string; role: string; orgId: string };
+    
+    if (!decoded.userId || !decoded.orgId) {
+      res.status(401).json({ error: 'Invalid token payload' });
+      return;
+    }
+
     req.userId = decoded.userId;
     req.userRole = decoded.role;
+    req.orgId = decoded.orgId;
     next();
   } catch {
     res.status(401).json({ error: 'Invalid or expired token' });

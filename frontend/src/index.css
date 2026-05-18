@@ -5,7 +5,7 @@
   --color-surface: rgba(255, 255, 255, 0.03);
   --color-surface-hover: rgba(255, 255, 255, 0.06);
   --color-surface-elevated: rgba(255, 255, 255, 0.08);
-  --color-accent-blue: #3b82f6;
+  --color-accent-blue: var(--brand-primary, #3b82f6);
   --color-accent-purple: #8b5cf6;
   --color-accent-cyan: #06b6d4;
   --color-accent-green: #22c55e;
@@ -38,12 +38,14 @@
   --text-faint: rgba(255, 255, 255, 0.20);
 
   /* Accents */
-  --accent-blue: #3b82f6;
+  --accent-blue: var(--brand-primary, #3b82f6);
   --accent-purple: #8b5cf6;
   --accent-cyan: #06b6d4;
   --accent-green: #22c55e;
   --accent-amber: #f59e0b;
   --accent-red: #ef4444;
+
+  --accent-primary: var(--accent-blue);
 
   /* Glass */
   --glass-bg: rgba(255, 255, 255, 0.04);
@@ -74,6 +76,37 @@
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+/* ─── Light Mode Overrides (Apple Style) ─── */
+:root[data-theme="light"] {
+  --bg-root: #f8f9fa;
+  --bg-surface: #ffffff;
+  --bg-sidebar: #ffffff;
+  --bg-surface-hover: #f1f3f5;
+  --bg-elevated: #ffffff;
+
+  --border-subtle: #f1f3f5;
+  --border-default: #e9ecef;
+  --border-strong: #dee2e6;
+
+  --text-primary: #000000;
+  --text-secondary: #374151;
+  --text-muted: #6b7280;
+  --text-faint: #9ca3af;
+
+  --glass-bg: #ffffff;
+  --glass-border: #e9ecef;
+  --glass-blur: none;
+
+  --accent-primary: #000000; /* Black buttons in light mode */
+  --gradient-login-bg: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%);
+
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.02);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.03), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.04), 0 4px 6px -2px rgba(0, 0, 0, 0.02);
+  
+  --shadow-glow-blue: 0 0 20px rgba(0, 0, 0, 0.02);
+}
+
 /* ─── Base Reset ─── */
 * {
   box-sizing: border-box;
@@ -88,6 +121,11 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
+}
+
+.btn-primary {
+  background: var(--accent-primary, var(--accent-blue));
+  color: white;
 }
 
 #root {
@@ -179,3 +217,78 @@ body {
 .delay-4 { animation-delay: 200ms; }
 .delay-5 { animation-delay: 250ms; }
 .delay-6 { animation-delay: 300ms; }
+html {
+  scroll-behavior: smooth;
+}
+
+/* Page Transition Wrapper */
+.page-transition {
+  animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Premium UI Elements */
+.glass-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: 24px;
+  box-shadow: var(--shadow-md);
+  transition: all 0.3s ease;
+}
+
+.glass-card:hover {
+  box-shadow: var(--shadow-lg);
+}
+
+.glass-panel {
+  background: var(--bg-surface);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-lg);
+}
+
+.glass-sidebar {
+  background: var(--bg-sidebar, var(--bg-root));
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border-right: 1px solid var(--border-default);
+}
+
+.text-gradient {
+  background: linear-gradient(135deg, #fff 0%, rgba(255, 255, 255, 0.5) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.shimmer-bg {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite linear;
+}
+
+/* Tooltip (pseudo-native) */
+[data-tooltip] {
+  position: relative;
+}
+
+[data-tooltip]:hover::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: 100%;
+  top: 50%;
+  transform: translateY(-50%) translateX(12px);
+  padding: 6px 12px;
+  background: #1a1b2a;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  border-radius: 6px;
+  white-space: nowrap;
+  z-index: 50;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+  animation: slideInRight 0.2s var(--ease-out-expo) forwards;
+}

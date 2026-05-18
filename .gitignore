@@ -4,3 +4,5 @@ dist
 .superpowers
 
 /src/generated/prisma
+*.db
+uploads/

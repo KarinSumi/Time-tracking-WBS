@@ -1,27 +1,25 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
-import { AlertCircle, CheckCircle2, Search, Bell, Plus, Check, Upload } from 'lucide-react';
+import { AlertCircle, Search, Bell, Plus, Check, Upload, Download } from 'lucide-react';
+import * as XLSX from 'xlsx';
 import { useNavigate } from 'react-router-dom';
 
-interface User { id: string; name: string; email: string; avatarUrl: string | null; }
-interface Project { id: string; name: string; color: string; }
-interface Phase { id: string; name: string; }
-interface TimeEntry {
-  id: string;
-  date: string;
-  hours: number;
-  taskDescription: string;
-  status: string;
-  user: User;
-  project: Project | null;
-  phase: Phase | null;
-}
+import type { User, Project, TimeEntry } from '../types';
 
 const formatDate = (dateStr: string) => {
   const date = new Date(dateStr);
   return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
 };
+
+import { 
+  getAdminEntries, 
+  getAdminUsers, 
+  updateAdminEntry, 
+  createAdminEntry, 
+  uploadAdminEntries,
+  getProjects
+} from '../api';
 
 const SuperAdminTable: React.FC = () => {
   const { token, user: currentUser } = useAuth();
@@ -57,17 +55,12 @@ const SuperAdminTable: React.FC = () => {
     if (!token) return;
     setIsLoading(true);
     try {
-      const params = new URLSearchParams();
-      if (filterUser) params.append('userId', filterUser);
-      if (filterProject) params.append('projectId', filterProject);
-      if (startDate) params.append('startDate', startDate);
-      if (endDate) params.append('endDate', endDate);
-
-      const res = await fetch(`/api/admin/entries?${params.toString()}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
+      const data = await getAdminEntries({
+        userId: filterUser || undefined,
+        projectId: filterProject || undefined,
+        startDate: startDate || undefined,
+        endDate: endDate || undefined
       });
-      if (!res.ok) throw new Error('Access denied');
-      const data = await res.json();
       setEntries(data);
     } catch (err) {
       addToast({ type: 'error', title: 'Error', message: 'Failed to load data or unauthorized' });
@@ -82,16 +75,14 @@ const SuperAdminTable: React.FC = () => {
 
   useEffect(() => {
     if (!token) return;
-    fetch('/api/admin/users', { headers: { 'Authorization': `Bearer ${token}` } })
-      .then(res => res.json()).then(setUsers).catch(console.error);
-    fetch('/api/projects', { headers: { 'Authorization': `Bearer ${token}` } })
-      .then(res => res.json()).then(setProjects).catch(console.error);
+    getAdminUsers().then(setUsers).catch(console.error);
+    getProjects().then(setProjects).catch(console.error);
   }, [token]);
 
   const dailyTotals = useMemo(() => {
     const totals: Record<string, number> = {};
     entries.forEach(e => {
-      const key = `${e.user.email}_${e.date.split('T')[0]}`;
+      const key = `${e.user?.email}_${e.date.split('T')[0]}`;
       totals[key] = (totals[key] || 0) + Number(e.hours);
     });
     // Add new row temporary hours if same day
@@ -106,12 +97,12 @@ const SuperAdminTable: React.FC = () => {
   }, [entries, isAddingRow, newEntryUserId, newEntryDate, newEntryHours, users]);
 
   const handleCellClick = (entry: TimeEntry, field: 'hours' | 'taskDescription') => {
-    setEditingCell({ id: entry.id, field });
+    setEditingCell({ id: entry.id!, field });
     setEditValue(field === 'hours' ? entry.hours.toString() : entry.taskDescription);
   };
 
   const handleSaveEdit = async (entry: TimeEntry, field: 'hours' | 'taskDescription') => {
-    if (!editingCell) return;
+    if (!editingCell || !entry.id) return;
     let newValue: any = editValue;
     if (field === 'hours') {
       newValue = parseFloat(editValue);
@@ -126,13 +117,7 @@ const SuperAdminTable: React.FC = () => {
     }
 
     try {
-      const res = await fetch(`/api/admin/entries/${entry.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify({ [field]: newValue })
-      });
-      if (!res.ok) throw new Error('Failed to update');
-      const updatedEntry = await res.json();
+      const updatedEntry = await updateAdminEntry(entry.id, { [field]: newValue });
       setEntries(prev => prev.map(e => e.id === entry.id ? { ...e, ...updatedEntry } : e));
       addToast({ type: 'success', title: 'Updated', message: 'Entry updated successfully' });
     } catch (err) {
@@ -159,19 +144,13 @@ const SuperAdminTable: React.FC = () => {
     }
 
     try {
-      const res = await fetch('/api/admin/entries', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify({
-          userId: newEntryUserId,
-          hours: h,
-          taskDescription: newEntryDesc,
-          projectId: newEntryProjectId || null,
-          date: new Date(newEntryDate + 'T12:00:00').toISOString()
-        })
+      const savedEntry = await createAdminEntry({
+        userId: newEntryUserId,
+        hours: h,
+        taskDescription: newEntryDesc,
+        projectId: newEntryProjectId || undefined,
+        date: new Date(newEntryDate + 'T12:00:00').toISOString()
       });
-      if (!res.ok) throw new Error('Create failed');
-      const savedEntry = await res.json();
       setEntries([savedEntry, ...entries]);
       addToast({ type: 'success', title: 'Success', message: 'Entry added successfully' });
       setIsAddingRow(false);
@@ -179,6 +158,30 @@ const SuperAdminTable: React.FC = () => {
       setNewEntryDesc('');
     } catch (err) {
       addToast({ type: 'error', title: 'Error', message: 'Failed to create entry' });
+    }
+  };
+
+  const handleExportExcel = () => {
+    try {
+      const exportData = entries.map(e => ({
+        'Date': e.date.split('T')[0],
+        'Employee': e.user?.name || e.user?.email,
+        'Project': e.project?.name || 'None',
+        'Phase': e.phase?.name || '-',
+        'Hours': e.hours,
+        'Task Description': e.taskDescription,
+        'Status': e.status
+      }));
+
+      const ws = XLSX.utils.json_to_sheet(exportData);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Time Entries');
+      
+      const fileName = `Time_Entries_Export_${new Date().toISOString().split('T')[0]}.xlsx`;
+      XLSX.writeFile(wb, fileName);
+      addToast({ type: 'success', title: 'Export Complete', message: `Downloaded ${fileName}` });
+    } catch (error) {
+      addToast({ type: 'error', title: 'Export Failed', message: 'Could not generate Excel file' });
     }
   };
 
@@ -191,22 +194,12 @@ const SuperAdminTable: React.FC = () => {
     formData.append('file', file);
 
     try {
-      const res = await fetch('/api/admin/entries/upload', {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` },
-        body: formData,
-      });
-      const data = await res.json();
-      
-      if (res.ok) {
-        addToast({ type: 'success', title: `Imported ${data.created} entries` });
-        if (data.errors > 0) addToast({ type: 'error', title: `${data.errors} rows failed validation` });
-        fetchEntries(); // Refresh table
-      } else {
-        addToast({ type: 'error', title: data.error || 'Upload failed' });
-      }
-    } catch {
-      addToast({ type: 'error', title: 'Upload connection error' });
+      const data = await uploadAdminEntries(formData);
+      addToast({ type: 'success', title: `Imported ${data.created} entries` });
+      if (data.errors > 0) addToast({ type: 'error', title: `${data.errors} rows failed validation` });
+      fetchEntries(); // Refresh table
+    } catch (err: any) {
+      addToast({ type: 'error', title: 'Upload failed', message: err.message });
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -305,6 +298,13 @@ const SuperAdminTable: React.FC = () => {
           </button>
 
           <button 
+            onClick={handleExportExcel}
+            className="ml-1 bg-[#25273c] hover:bg-[#2d2f48] text-white/80 hover:text-white text-sm font-medium py-1.5 px-4 rounded-lg flex items-center gap-2 transition-colors border border-white/10"
+          >
+            <Download size={16} /> Export
+          </button>
+
+          <button 
             onClick={() => setIsAddingRow(true)}
             className="ml-1 bg-[#9c5af2] hover:bg-[#8b4de0] text-white text-sm font-semibold py-1.5 px-4 rounded-lg flex items-center gap-2 transition-colors shadow-[0_0_15px_rgba(156,90,242,0.4)]"
           >
@@ -367,11 +367,11 @@ const SuperAdminTable: React.FC = () => {
 
               {/* Render Existing Entries */}
               {entries.map(entry => {
-                const dateKey = `${entry.user.email}_${entry.date.split('T')[0]}`;
+                const dateKey = `${entry.user?.email}_${entry.date.split('T')[0]}`;
                 const totalHours = dailyTotals[dateKey] || 0;
                 const isHoursInvalid = totalHours !== 8;
-                const isEditingHours = editingCell?.id === entry.id && editingCell.field === 'hours';
-                const isEditingDesc = editingCell?.id === entry.id && editingCell.field === 'taskDescription';
+                const isEditingHours = editingCell?.id === entry.id && editingCell?.field === 'hours';
+                const isEditingDesc = editingCell?.id === entry.id && editingCell?.field === 'taskDescription';
 
                 return (
                   <tr key={entry.id} className="hover:bg-white/[0.03] transition-colors group">
@@ -387,12 +387,12 @@ const SuperAdminTable: React.FC = () => {
                     </td>
                     <td className="px-6 py-3">
                       <div className="flex items-center gap-2">
-                        {entry.user.avatarUrl ? (
-                          <img src={entry.user.avatarUrl} alt="" className="w-6 h-6 rounded-full object-cover" />
+                        {entry.user?.avatarUrl ? (
+                          <img src={entry.user?.avatarUrl} alt="" className="w-6 h-6 rounded-full object-cover" />
                         ) : (
                           <div className="w-6 h-6 rounded-full bg-white/10" />
                         )}
-                        <span className="text-white/80 font-medium">{entry.user.name || entry.user.email}</span>
+                        <span className="text-white/80 font-medium">{entry.user?.name || entry.user?.email}</span>
                       </div>
                     </td>
                     <td className="px-6 py-3">

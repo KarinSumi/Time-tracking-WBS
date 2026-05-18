@@ -1,18 +1,9 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { useToast } from '../context/ToastContext';
 import { useAuth } from '../context/AuthContext';
-import { Clock, ArrowRight, Hash, Layers, FolderKanban, CalendarDays } from 'lucide-react';
-import type { TimeEntry } from './Dashboard';
+import { Clock } from 'lucide-react';
+import type { TimeEntry, Project, Phase, PlannedTask as Plan } from '../types';
 
-interface Project { id: string; name: string; color: string; }
-interface Phase { id: string; name: string; }
-interface Plan { id: string; taskDescription: string; projectId?: string; phaseId?: string; status: string; }
-
-const formatDateThai = (dateStr: string) => {
-  if (!dateStr) return '';
-  const [year, month, day] = dateStr.split('-');
-  return `${day}/${month}/${year}`;
-};
 
 type TimeMode = 'range' | 'direct';
 
@@ -24,9 +15,11 @@ interface TimeEntryFormProps {
   onCancelEdit?: () => void;
 }
 
+import { getProjects, getPhases, getPlans, createEntry, updateEntry } from '../api';
+
 const TimeEntryForm: React.FC<TimeEntryFormProps> = ({ onEntrySaved, selectedDate, onDateChange, editingEntry, onCancelEdit }) => {
   const { addToast } = useToast();
-  const { token } = useAuth();
+  const { token, theme } = useAuth();
 
   const [description, setDescription] = useState('');
   const [projectId, setProjectId] = useState('');
@@ -45,10 +38,9 @@ const TimeEntryForm: React.FC<TimeEntryFormProps> = ({ onEntrySaved, selectedDat
 
   useEffect(() => {
     if (!token) return;
-    const h = { 'Authorization': `Bearer ${token}` };
-    fetch('/api/projects', { headers: h }).then(r => r.json()).then(setProjects).catch(() => {});
-    fetch('/api/phases', { headers: h }).then(r => r.json()).then(setPhases).catch(() => {});
-    fetch('/api/plans', { headers: h }).then(r => r.json())
+    getProjects().then(setProjects).catch(() => {});
+    getPhases().then(setPhases).catch(() => {});
+    getPlans()
       .then((data: Plan[]) => setPlans(data.filter(p => p.status !== 'COMPLETED')))
       .catch(() => {});
   }, [token]);
@@ -96,136 +88,114 @@ const TimeEntryForm: React.FC<TimeEntryFormProps> = ({ onEntrySaved, selectedDat
 
     setIsSaving(true);
     try {
-      const url = editingEntry ? `/api/entries/${editingEntry.id}` : '/api/entries';
-      const method = editingEntry ? 'PUT' : 'POST';
-      const res = await fetch(url, {
-        method, headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify({ hours: duration, taskDescription: description, date: new Date(selectedDate + 'T12:00:00').toISOString(),
-          projectId: projectId || undefined, phaseId: phaseId || undefined, plannedTaskId: plannedTaskId || undefined }),
-      });
-      if (res.ok) {
-        addToast({ type: 'success', title: editingEntry ? 'Entry updated!' : 'Entry logged!', message: `${duration}h tracked for "${description}"` });
-        setDescription(''); setDirectHours(''); setStartTime('09:00'); setEndTime('17:00'); setPlannedTaskId('');
-        onEntrySaved?.();
-        if (editingEntry) onCancelEdit?.();
-      } else { const d = await res.json().catch(() => ({})); addToast({ type: 'error', title: 'Failed to save', message: d.error || 'Could not log time entry.' }); }
-    } catch { addToast({ type: 'error', title: 'Connection error', message: 'Unable to reach the server.' }); }
-    finally { setIsSaving(false); }
+      const entryData = { 
+        hours: duration, 
+        taskDescription: description, 
+        date: new Date(selectedDate + 'T12:00:00').toISOString(),
+        projectId: projectId || undefined, 
+        phaseId: phaseId || undefined, 
+        plannedTaskId: plannedTaskId || undefined 
+      };
+
+      if (editingEntry?.id) {
+        await updateEntry(editingEntry.id, entryData);
+      } else {
+        await createEntry(entryData);
+      }
+
+      addToast({ type: 'success', title: editingEntry ? 'Entry updated!' : 'Entry logged!', message: `${duration}h tracked for "${description}"` });
+      setDescription(''); setDirectHours(''); setStartTime('09:00'); setEndTime('17:00'); setPlannedTaskId('');
+      onEntrySaved?.();
+      if (editingEntry) onCancelEdit?.();
+    } catch (err: any) {
+      addToast({ type: 'error', title: 'Failed to save', message: err.message || 'Could not log time entry.' });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
     <div className="h-full flex flex-col">
-      <div className="flex items-center justify-between mb-5">
-        <h2 className="text-[11px] font-semibold text-white/35 uppercase tracking-widest flex items-center gap-2">
-          <Clock size={13} className="text-white/25" />Quick Log</h2>
-        <span className="text-[10px] text-white/20 font-medium">⌘ + Enter to save</span>
+      <div className="flex items-center justify-between mb-2">
+        <h2 className="text-[11px] font-semibold text-[var(--text-muted)] uppercase tracking-widest flex items-center gap-2">
+          <Clock size={13} className="text-[var(--text-faint)]" />Quick Log</h2>
+        <span className="text-[10px] text-[var(--text-faint)] font-medium">⌘ + Enter to save</span>
       </div>
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-5 flex-1">
-        <div className="flex flex-wrap gap-3">
-          {plans.length > 0 && (
-            <div className="flex items-center gap-2 min-w-0">
-              <span className="text-[10px] uppercase text-white/30 tracking-wider">Plan:</span>
-              <select value={plannedTaskId} onChange={e => handlePlanSelect(e.target.value)} className="select-styled text-xs py-2 bg-blue-500/10 border-blue-500/20 text-blue-200">
-                <option value="">None (Ad-hoc)</option>
-                {plans.map(p => <option key={p.id} value={p.id}>{p.taskDescription}</option>)}
-              </select>
-            </div>
-          )}
-          <div className="flex items-center gap-2 min-w-0">
-            <FolderKanban size={14} className="text-white/25 flex-shrink-0" />
-            <select id="entry-project" value={projectId} onChange={e => setProjectId(e.target.value)} className="select-styled text-xs py-2">
-              <option value="">Project</option>
-              {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-            </select>
-          </div>
-          <div className="flex items-center gap-2 min-w-0">
-            <Layers size={14} className="text-white/25 flex-shrink-0" />
-            <select id="entry-phase" value={phaseId} onChange={e => setPhaseId(e.target.value)} className="select-styled text-xs py-2">
-              <option value="">Phase</option>
-              {phases.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-            </select>
-          </div>
-          <div className="flex items-center gap-2 min-w-0 group">
-            <CalendarDays size={14} className="text-white/25 flex-shrink-0" />
-            <div className="relative">
-              <div className="select-styled text-xs py-2 px-3 flex items-center justify-center w-[105px] tabular-nums tracking-wide text-white/90">
-                {formatDateThai(selectedDate)}
-              </div>
-              <input 
-                id="entry-date" 
-                type="date" 
-                value={selectedDate} 
-                onChange={e => onDateChange(e.target.value)} 
-                className="absolute inset-0 opacity-0 cursor-pointer w-full h-full" 
-                style={{ colorScheme: 'dark' }} 
-              />
-            </div>
-          </div>
-        </div>
-
+      <form onSubmit={handleSubmit} className="flex flex-col gap-6 flex-1">
+        {/* Top: Description */}
         <div>
+          <label className="text-[10px] text-[var(--text-muted)] font-medium uppercase tracking-wider mb-2 block">Current Focus</label>
           <input id="entry-description" type="text" value={description} onChange={e => setDescription(e.target.value)}
-            className="w-full bg-transparent border-none text-xl font-medium focus:ring-0 focus:outline-none p-0 text-white placeholder:text-white/20"
+            className="w-full bg-transparent border-none text-2xl font-bold focus:ring-0 focus:outline-none p-0 text-[var(--text-primary)] placeholder:text-[var(--text-faint)]"
             placeholder="What are you working on?"
             onKeyDown={e => { if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') { e.preventDefault(); e.currentTarget.form?.requestSubmit(); } }} />
         </div>
 
-        <div className="flex flex-col gap-3">
-          <div className="tab-group w-fit">
-            <button type="button" className={`tab-item ${timeMode === 'range' ? 'active' : ''}`} onClick={() => setTimeMode('range')}>
-              <span className="flex items-center gap-1.5"><ArrowRight size={12} />Time Range</span></button>
-            <button type="button" className={`tab-item ${timeMode === 'direct' ? 'active' : ''}`} onClick={() => setTimeMode('direct')}>
-              <span className="flex items-center gap-1.5"><Hash size={12} />Direct Input</span></button>
+        {/* Middle: Selects */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="flex flex-col gap-2">
+            <label className="text-[10px] text-[var(--text-muted)] font-medium uppercase tracking-wider">Project Name</label>
+            <select id="entry-project" value={projectId} onChange={e => setProjectId(e.target.value)} className="select-styled text-sm py-2.5 w-full">
+              <option value="">Select Project</option>
+              {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+            </select>
           </div>
-          <div className="flex items-center gap-3">
-            {timeMode === 'range' ? (<>
-              <div className="flex items-center gap-2">
-                <label htmlFor="entry-start-time" className="text-[10px] text-white/30 font-medium uppercase tracking-wider">From</label>
-                <input id="entry-start-time" type="time" value={startTime} onChange={e => setStartTime(e.target.value)} className="glass-input px-3 py-2 rounded-lg text-sm w-28 text-center" style={{ colorScheme: 'dark' }} />
-              </div>
-              <ArrowRight size={16} className="text-white/15 flex-shrink-0" />
-              <div className="flex items-center gap-2">
-                <label htmlFor="entry-end-time" className="text-[10px] text-white/30 font-medium uppercase tracking-wider">To</label>
-                <input id="entry-end-time" type="time" value={endTime} onChange={e => setEndTime(e.target.value)} className="glass-input px-3 py-2 rounded-lg text-sm w-28 text-center" style={{ colorScheme: 'dark' }} />
-              </div>
-              <div className="ml-3 pl-3 border-l border-white/10">
-                <span className="text-lg font-semibold text-white tabular-nums">{duration > 0 ? duration.toFixed(1) : '0.0'}h</span>
-                <span className="text-[10px] text-white/30 ml-1.5 uppercase tracking-wider font-medium">auto</span>
-              </div>
-            </>) : (
-              <div className="flex items-center gap-2">
-                <label htmlFor="entry-direct-hours" className="text-[10px] text-white/30 font-medium uppercase tracking-wider">Hours</label>
-                <input id="entry-direct-hours" type="number" step="0.25" min="0" max="24" value={directHours}
-                  onChange={e => setDirectHours(e.target.value)} className="glass-input px-3 py-2 rounded-lg text-sm w-24 text-center" placeholder="0.0" />
-                <span className="text-sm text-white/30 font-medium">hours</span>
-              </div>
-            )}
+          <div className="flex flex-col gap-2">
+            <label className="text-[10px] text-[var(--text-muted)] font-medium uppercase tracking-wider">Development State</label>
+            <select id="entry-phase" value={phaseId} onChange={e => setPhaseId(e.target.value)} className="select-styled text-sm py-2.5 w-full">
+              <option value="">Select Phase</option>
+              {phases.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+            </select>
+          </div>
+          <div className="flex flex-col gap-2">
+            <label className="text-[10px] text-[var(--text-muted)] font-medium uppercase tracking-wider">Task Name</label>
+            <select value={plannedTaskId} onChange={e => handlePlanSelect(e.target.value)} className="select-styled text-sm py-2.5 w-full">
+              <option value="">None (Ad-hoc)</option>
+              {plans.map(p => <option key={p.id} value={p.id}>{p.taskDescription}</option>)}
+            </select>
           </div>
         </div>
 
-        <div className="flex items-center justify-between mt-auto pt-2">
-          <div className="flex items-center gap-2 flex-wrap">
-            {projectId && projects.find(p => p.id === projectId) && (
-              <span className="badge text-[10px]" style={{
-                background: `${projects.find(p => p.id === projectId)?.color}15`,
-                color: projects.find(p => p.id === projectId)?.color,
-                border: `1px solid ${projects.find(p => p.id === projectId)?.color}30`,
-              }}>{projects.find(p => p.id === projectId)?.name}</span>
-            )}
-            {phaseId && phases.find(p => p.id === phaseId) && (
-              <span className="badge badge-info text-[10px]">{phases.find(p => p.id === phaseId)?.name}</span>
-            )}
+        {/* Divider */}
+        <div className="h-px bg-[var(--border-subtle)] w-full" />
+
+        {/* Bottom: Time & Submit */}
+        <div className="flex items-center justify-between mt-auto">
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[var(--bg-surface-hover)] border border-[var(--border-subtle)]">
+              <span className="text-[10px] text-[var(--text-muted)] font-bold uppercase tracking-wider">No. of Hours</span>
+              <div className="flex items-center gap-3 ml-2 border-l border-[var(--border-subtle)] pl-4">
+                <input type="number" step="0.5" value={directHours} onChange={e => { setTimeMode('direct'); setDirectHours(e.target.value); }}
+                  className="w-12 bg-transparent border-none text-sm font-bold focus:ring-0 p-0 text-[var(--text-primary)]" placeholder="0.0" />
+                <span className="text-[10px] text-[var(--text-faint)] uppercase tracking-wider font-bold">Hrs</span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-4">
+              <span className="text-[10px] text-[var(--text-faint)] font-bold uppercase tracking-wider">From-To</span>
+              <div className="flex items-center gap-2 p-1.5 rounded-lg bg-[var(--bg-surface-hover)] border border-[var(--border-subtle)]">
+                 <input type="time" value={startTime} onChange={e => { setTimeMode('range'); setStartTime(e.target.value); }} className="bg-transparent border-none text-xs font-medium focus:ring-0 p-0 w-16 text-center" style={{ colorScheme: theme === 'dark' ? 'dark' : 'light' }} />
+                 <span className="text-[var(--text-faint)]">-</span>
+                 <input type="time" value={endTime} onChange={e => { setTimeMode('range'); setEndTime(e.target.value); }} className="bg-transparent border-none text-xs font-medium focus:ring-0 p-0 w-16 text-center" style={{ colorScheme: theme === 'dark' ? 'dark' : 'light' }} />
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+               <span className="text-2xl font-black text-[var(--text-primary)] tabular-nums">{duration > 0 ? (duration % 1 === 0 ? duration : duration.toFixed(1)) : '0.0'}</span>
+               <span className="text-[10px] text-[var(--text-faint)] font-black uppercase tracking-widest">Hrs</span>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
+
+          <div className="flex items-center gap-3">
             {editingEntry && (
-              <button type="button" onClick={onCancelEdit} className="btn-secondary px-4 py-2.5 text-sm font-semibold">
+              <button type="button" onClick={onCancelEdit} className="btn-secondary px-6 py-3 text-sm font-bold">
                 Cancel
               </button>
             )}
             <button id="entry-submit-btn" type="submit" disabled={isSaving}
-              className="btn-primary px-6 py-2.5 text-sm font-semibold flex items-center gap-2">
-              {isSaving ? 'Saving...' : (editingEntry ? 'Update Entry' : 'Save Entry')}
+              className="btn-primary px-10 py-3 text-sm font-bold rounded-2xl shadow-xl hover:shadow-2xl transition-all">
+              {isSaving ? 'Saving...' : (editingEntry ? 'Update Task' : 'Log Task')}
             </button>
           </div>
         </div>

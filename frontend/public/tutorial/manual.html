@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aion Portfolio Intelligence — User Manual</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #08080f;
+            --glass: rgba(255, 255, 255, 0.03);
+            --border: rgba(255, 255, 255, 0.08);
+            --accent: #3b82f6;
+            --text: #ffffff;
+            --text-muted: rgba(255, 255, 255, 0.4);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Background Glows */
+        .glow {
+            position: fixed;
+            width: 800px;
+            height: 800px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.08) 0%, transparent 70%);
+            z-index: -1;
+            filter: blur(80px);
+        }
+        .glow-1 { top: -200px; right: -200px; }
+        .glow-2 { bottom: -200px; left: -200px; }
+
+        header {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 2rem;
+            background: radial-gradient(circle at center, rgba(10, 10, 20, 0) 0%, var(--bg) 100%);
+        }
+
+        h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 5rem;
+            font-weight: 800;
+            letter-spacing: -0.04em;
+            background: linear-gradient(to bottom, #fff 40%, rgba(255,255,255,0.4) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+        }
+
+        .subtitle {
+            font-size: 1.25rem;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin-bottom: 3rem;
+            letter-spacing: 0.02em;
+        }
+
+        .btn-scroll {
+            background: var(--accent);
+            color: white;
+            padding: 1rem 2.5rem;
+            border-radius: 100px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            box-shadow: 0 10px 40px rgba(59, 130, 246, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .btn-scroll:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 60px rgba(59, 130, 246, 0.5);
+        }
+
+        main {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+        }
+
+        section {
+            margin-bottom: 8rem;
+            scroll-margin-top: 4rem;
+        }
+
+        .section-tag {
+            color: var(--accent);
+            font-size: 0.75rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            display: block;
+            margin-bottom: 1rem;
+        }
+
+        h2 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        p {
+            color: rgba(255,255,255,0.7);
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .feature-card {
+            background: var(--glass);
+            border: 1px solid var(--border);
+            padding: 2.5rem;
+            border-radius: 2rem;
+            backdrop-filter: blur(20px);
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            border-color: rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.05);
+            transform: translateY(-5px);
+        }
+
+        .feature-card h3 {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            color: #fff;
+        }
+
+        .feature-card p {
+            font-size: 0.95rem;
+            margin-bottom: 0;
+            color: var(--text-muted);
+        }
+
+        .video-placeholder {
+            width: 100%;
+            aspect-ratio: 16/9;
+            background: #000;
+            border-radius: 2rem;
+            border: 1px solid var(--border);
+            margin-top: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .video-placeholder::before {
+            content: '▶';
+            font-size: 3rem;
+            color: var(--accent);
+            opacity: 0.5;
+            transition: all 0.3s ease;
+        }
+
+        .video-placeholder:hover::before {
+            transform: scale(1.2);
+            opacity: 1;
+        }
+
+        footer {
+            padding: 6rem 2rem;
+            text-align: center;
+            border-top: 1px solid var(--border);
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 1.5rem 3rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            background: rgba(8, 8, 15, 0.5);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .nav-logo {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 1.5rem;
+            text-decoration: none;
+            color: #fff;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: #fff;
+        }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 3rem; }
+            nav { padding: 1rem 1.5rem; }
+            .nav-links { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="glow glow-1"></div>
+    <div class="glow glow-2"></div>
+
+    <nav>
+        <a href="#" class="nav-logo">AION</a>
+        <div class="nav-links">
+            <a href="#logging">Logging</a>
+            <a href="#planning">Planning</a>
+            <a href="#intelligence">Intelligence</a>
+            <a href="#admin">Admin</a>
+        </div>
+    </nav>
+
+    <header>
+        <span class="section-tag">Enterprise Portfolio Intelligence</span>
+        <h1>Master Aion</h1>
+        <p class="subtitle">The definitive guide to optimizing your organizational workflow, resource capacity, and strategic delivery.</p>
+        <a href="#logging" class="btn-scroll">Begin Walkthrough</a>
+    </header>
+
+    <main>
+        <section id="logging">
+            <span class="section-tag">Module 01</span>
+            <h2>Precision Time Logging</h2>
+            <p>Aion provides three distinct methods for capturing work intensity. Whether you need quick entries or mass day logs, the platform ensures total accuracy with minimal friction.</p>
+            
+            <div class="card-grid">
+                <div class="feature-card">
+                    <h3>Quick Log</h3>
+                    <p>The standard dashboard widget for immediate entry. Select your project, phase, and task with smart autocomplete.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Bulk Logging</h3>
+                    <p>Log hours across multiple days or weeks simultaneously. Perfect for repetitive tasks or catching up on Friday.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Draft Workflow</h3>
+                    <p>Entries start as Drafts. Use the Time Logs page to review, edit, and bulk-submit your work for the week.</p>
+                </div>
+            </div>
+
+            <div class="video-placeholder">Watch: Master the Logging Workflow</div>
+        </section>
+
+        <section id="planning">
+            <span class="section-tag">Module 02</span>
+            <h2>Strategic Project Planning</h2>
+            <p>Go beyond simple lists. Aion's planning module supports complex Work Breakdown Structures (WBS) and real-time Gantt visualization.</p>
+            
+            <div class="card-grid">
+                <div class="feature-card">
+                    <h3>Hierarchical WBS</h3>
+                    <p>Nest tasks to infinite depth. Track progress at the sub-task level and see it roll up to the project total.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Interactive Gantt</h3>
+                    <p>Visualize timelines and dependencies. Drag and drop to adjust schedules (Admin only).</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Plan vs Actual</h3>
+                    <p>The core of Aion. Directly link time entries to planned tasks to see variance in real-time.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="intelligence">
+            <span class="section-tag">Module 03</span>
+            <h2>Resource Intelligence</h2>
+            <p>Predict bottlenecks before they happen. Our forecasting engine analyzes planned workloads across the entire organization.</p>
+            
+            <div class="card-grid">
+                <div class="feature-card">
+                    <h3>Capacity Heatmaps</h3>
+                    <p>Identify over-allocated team members with color-coded utilization charts.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Workday Interpolation</h3>
+                    <p>Our engine automatically accounts for weekends and organization-specific holidays when calculating availability.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Strategic Forecasting</h3>
+                    <p>View organizational load 6 months into the future to inform hiring and project acceptance decisions.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="admin">
+            <span class="section-tag">Module 04</span>
+            <h2>Enterprise Administration</h2>
+            <p>Complete control over your organizational identity, data privacy, and compliance standards.</p>
+            
+            <div class="card-grid">
+                <div class="feature-card">
+                    <h3>Custom Branding</h3>
+                    <p>Upload your organization's logo and set your primary brand color to theme the entire Aion instance.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Multi-Tenant Isolation</h3>
+                    <p>Bank-grade isolation ensures that your data is never visible to other organizations on the platform.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Audit Trails</h3>
+                    <p>Every creation, modification, and deletion is recorded in an immutable audit log for total accountability.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 Aion Portfolio Intelligence. All rights reserved.</p>
+        <p style="margin-top: 1rem; font-size: 0.7rem; opacity: 0.5;">Proprietary & Confidential</p>
+    </footer>
+
+    <script>
+        // Smooth scroll for nav links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,127 +1,42 @@
 import express from 'express';
-import bcrypt from 'bcryptjs';
-import prisma from '../lib/prisma';
-import { generateToken } from '../middleware/auth';
+import { authMiddleware, AuthRequest } from '../middleware/auth';
+import multer from 'multer';
+import path from 'path';
+import { login, register, getMe, updateAvatar } from '../services/AuthService';
 
 const router = express.Router();
 
 // POST /api/auth/login
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
-
   if (!email || !password) {
     res.status(400).json({ error: 'Email and password are required' });
     return;
   }
 
   try {
-    const user = await prisma.user.findUnique({
-      where: { email },
-      include: { organization: true },
-    });
-
-    if (!user) {
-      res.status(401).json({ error: 'Invalid email or password' });
-      return;
-    }
-
-    // Check password — support both hashed and plaintext (for seed data)
-    let validPassword = false;
-    try {
-      validPassword = await bcrypt.compare(password, user.passwordHash);
-    } catch {
-      // If bcrypt fails (plaintext hash from seed), do direct compare
-      validPassword = password === user.passwordHash;
-    }
-
-    if (!validPassword) {
-      res.status(401).json({ error: 'Invalid email or password' });
-      return;
-    }
-
-    const token = generateToken(user.id, user.role);
-
-    res.json({
-      token,
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        avatarUrl: user.avatarUrl,
-        orgName: user.organization.name,
-        orgId: user.orgId,
-      },
-    });
-  } catch (error) {
-    console.error('Login error:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    const result = await login(email, password);
+    res.json(result);
+  } catch (error: any) {
+    const status = error.message === 'Invalid email or password' ? 401 : 500;
+    res.status(status).json({ error: error.message || 'Internal server error' });
   }
 });
 
 // POST /api/auth/register
 router.post('/register', async (req, res) => {
   const { name, email, password, orgName } = req.body;
-
   if (!email || !password || !name) {
     res.status(400).json({ error: 'Name, email, and password are required' });
     return;
   }
 
   try {
-    // Check if user already exists
-    const existing = await prisma.user.findUnique({ where: { email } });
-    if (existing) {
-      res.status(409).json({ error: 'An account with this email already exists' });
-      return;
-    }
-
-    // Hash password
-    const passwordHash = await bcrypt.hash(password, 10);
-
-    // Find or create organization
-    let org;
-    if (orgName) {
-      org = await prisma.organization.findFirst({ where: { name: orgName } });
-      if (!org) {
-        org = await prisma.organization.create({ data: { name: orgName } });
-      }
-    } else {
-      // Use default org or create one
-      org = await prisma.organization.findFirst();
-      if (!org) {
-        org = await prisma.organization.create({ data: { name: 'Default Organization' } });
-      }
-    }
-
-    const user = await prisma.user.create({
-      data: {
-        name,
-        email,
-        passwordHash,
-        orgId: org.id,
-        role: 'USER',
-        avatarUrl: `https://i.pravatar.cc/150?u=${email}`,
-      },
-    });
-
-    const token = generateToken(user.id, user.role);
-
-    res.status(201).json({
-      token,
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        avatarUrl: user.avatarUrl,
-        orgName: org.name,
-        orgId: user.orgId,
-      },
-    });
-  } catch (error) {
-    console.error('Register error:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    const result = await register(name, email, password, orgName);
+    res.status(201).json(result);
+  } catch (error: any) {
+    const status = error.message.includes('already exists') ? 409 : 500;
+    res.status(status).json({ error: error.message || 'Internal server error' });
   }
 });
 
@@ -138,27 +53,50 @@ router.get('/me', async (req, res) => {
     const secret = process.env.JWT_SECRET || 'aion-dev-secret-key-change-in-production';
     const decoded = jwt.default.verify(authHeader.split(' ')[1]!, secret) as { userId: string };
 
-    const user = await prisma.user.findUnique({
-      where: { id: decoded.userId },
-      include: { organization: true },
-    });
+    const result = await getMe(decoded.userId);
+    res.json(result);
+  } catch (error: any) {
+    const status = error.message === 'User not found' ? 404 : 401;
+    res.status(status).json({ error: error.message === 'User not found' ? 'User not found' : 'Invalid token' });
+  }
+});
 
-    if (!user) {
-      res.status(404).json({ error: 'User not found' });
-      return;
-    }
+// Avatar Upload Configuration
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'uploads/avatars/');
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+    cb(null, 'avatar-' + uniqueSuffix + path.extname(file.originalname));
+  }
+});
 
-    res.json({
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      avatarUrl: user.avatarUrl,
-      orgName: user.organization.name,
-      orgId: user.orgId,
-    });
-  } catch {
-    res.status(401).json({ error: 'Invalid token' });
+const upload = multer({
+  storage,
+  limits: { fileSize: 2 * 1024 * 1024 }, // 2MB
+  fileFilter: (req, file, cb) => {
+    const allowed = ['.jpg', '.jpeg', '.png', '.webp'];
+    const ext = path.extname(file.originalname).toLowerCase();
+    if (allowed.includes(ext)) cb(null, true);
+    else cb(new Error('Only images are allowed'));
+  }
+});
+
+// POST /api/auth/profile/avatar
+router.post('/profile/avatar', authMiddleware, upload.single('avatar'), async (req: AuthRequest, res) => {
+  if (!req.file) {
+    res.status(400).json({ error: 'No file uploaded' });
+    return;
+  }
+
+  try {
+    const avatarUrl = `/uploads/avatars/${req.file.filename}`;
+    await updateAvatar(req.userId!, avatarUrl);
+    res.json({ avatarUrl });
+  } catch (error) {
+    console.error('Avatar upload error:', error);
+    res.status(500).json({ error: 'Failed to update avatar' });
   }
 });
 

@@ -4,138 +4,183 @@ import bcrypt from 'bcryptjs';
 const prisma = new PrismaClient();
 
 async function main() {
-  const org = await prisma.organization.upsert({
-    where: { id: 'org-001' },
-    update: {},
-    create: { id: 'org-001', name: 'Stitch & Co' },
-  });
+  console.log('--- Starting Multi-Tenant Seed ---');
+
+  // Clear existing data (Caution: Only for dev/test)
+  await prisma.auditLog.deleteMany({});
+  await prisma.timeEntry.deleteMany({});
+  await prisma.plannedTask.deleteMany({});
+  await prisma.holiday.deleteMany({});
+  await prisma.phase.deleteMany({});
+  await prisma.project.deleteMany({});
+  await prisma.user.deleteMany({});
+  await prisma.organization.deleteMany({});
 
   const hash = await bcrypt.hash('password123', 10);
-  await prisma.user.upsert({
-    where: { email: 'admin@example.com' },
-    update: { passwordHash: hash },
-    create: {
-      id: 'usr-001', email: 'admin@example.com', name: 'John Doe',
-      passwordHash: hash, orgId: org.id, role: 'ADMIN',
-      avatarUrl: 'https://i.pravatar.cc/150?u=admin@example.com',
-    },
+
+  // --- ORG 1: Stitch & Co ---
+  const org1 = await prisma.organization.create({
+    data: { id: 'org-001', name: 'Stitch & Co' }
   });
 
-  await prisma.user.upsert({
-    where: { email: 'superadmin@example.com' },
-    update: { passwordHash: hash, role: 'SUPER_ADMIN' },
-    create: {
-      id: 'usr-super', email: 'superadmin@example.com', name: 'Super Admin',
-      passwordHash: hash, orgId: org.id, role: 'SUPER_ADMIN',
-      avatarUrl: 'https://i.pravatar.cc/150?u=superadmin@example.com',
-    },
-  });
-
-  // Seed Projects
-  const projects = [
-    { name: 'Dashboard App', color: '#3b82f6' },
-    { name: 'API Backend', color: '#8b5cf6' },
-    { name: 'Mobile App', color: '#06b6d4' },
-    { name: 'Design System', color: '#f59e0b' },
-    { name: 'DevOps', color: '#22c55e' },
+  const stitchUsers = [
+    { id: 'usr-stitch-admin', email: 'admin@stitch.com', name: 'John Stitch', role: 'ADMIN' as const },
+    { id: 'usr-stitch-alice', email: 'alice@stitch.com', name: 'Alice Frontend', role: 'USER' as const },
+    { id: 'usr-stitch-bob', email: 'bob@stitch.com', name: 'Bob Backend', role: 'USER' as const },
   ];
-  for (const p of projects) {
-    const existing = await prisma.project.findFirst({ where: { name: p.name, orgId: org.id } });
-    if (!existing) {
-      await prisma.project.create({ data: { ...p, orgId: org.id } });
-    }
-  }
 
-  // Seed Phases
-  const phases = ['Planning', 'Design', 'Development', 'Testing', 'Code Review', 'Deployment'];
-  for (const phaseName of phases) {
-    const existing = await prisma.phase.findFirst({ where: { name: phaseName, orgId: org.id } });
-    if (!existing) {
-      await prisma.phase.create({ data: { name: phaseName, sortOrder: phases.indexOf(phaseName), orgId: org.id } });
-    }
-  }
-
-  console.log('✅ Seeded org, users, projects, phases');
-
-  // Seed additional users
-  const mockUsers = [
-    { email: 'alice@example.com', name: 'Alice Frontend' },
-    { email: 'bob@example.com', name: 'Bob Backend' },
-    { email: 'charlie@example.com', name: 'Charlie Designer' },
-  ];
-  
-  const userIds: string[] = [];
-  const adminUser = await prisma.user.findUnique({ where: { email: 'admin@example.com' } });
-  if (adminUser) userIds.push(adminUser.id);
-  const superAdminUser = await prisma.user.findUnique({ where: { email: 'superadmin@example.com' } });
-  if (superAdminUser) userIds.push(superAdminUser.id);
-  
-  for (const mu of mockUsers) {
-    const existing = await prisma.user.findUnique({ where: { email: mu.email } });
-    if (!existing) {
-      const created = await prisma.user.create({
-        data: {
-          email: mu.email, name: mu.name, orgId: org.id, passwordHash: hash,
-          role: 'USER', avatarUrl: `https://i.pravatar.cc/150?u=${mu.email}`
-        }
-      });
-      userIds.push(created.id);
-    } else {
-      userIds.push(existing.id);
-    }
-  }
-
-  // Fetch all projects and phases to link
-  const allProjects = await prisma.project.findMany();
-  const allPhases = await prisma.phase.findMany();
-
-  // Clear existing mock time entries to avoid infinite duplicates if seeded multiple times
-  await prisma.timeEntry.deleteMany({});
-
-  // Generate 2 weeks of data
-  const mockEntries = [];
-  const today = new Date();
-  
-  for (let i = 0; i < 14; i++) {
-    const d = new Date(today);
-    d.setDate(today.getDate() - i);
-    // Skip weekends for some realism
-    if (d.getDay() === 0 || d.getDay() === 6) continue;
-
-    for (const uId of userIds) {
-      // Randomly decide if this day is perfect 8 hours, under 8, or over 8
-      const r = Math.random();
-      let totalTarget = 8.0;
-      if (r < 0.2) totalTarget = 6.5; // Under-logged
-      else if (r > 0.8) totalTarget = 9.5; // Over-logged
-
-      // Split this total into 1 to 3 entries
-      const numEntries = Math.floor(Math.random() * 3) + 1;
-      let remaining = totalTarget;
-
-      for (let j = 0; j < numEntries; j++) {
-        const hours = j === numEntries - 1 ? remaining : Math.round((Math.random() * (remaining - 1) + 1) * 2) / 2;
-        remaining -= hours;
-
-        mockEntries.push({
-          userId: uId,
-          date: new Date(d.setHours(12, 0, 0, 0)),
-          hours: hours,
-          taskDescription: `Worked on ${['feature development', 'bug fixing', 'meetings', 'code review', 'design specs'][Math.floor(Math.random() * 5)]}`,
-          projectId: allProjects[Math.floor(Math.random() * allProjects.length)]!.id,
-          phaseId: allPhases[Math.floor(Math.random() * allPhases.length)]!.id,
-          status: 'SUBMITTED' as any
-        });
+  for (const u of stitchUsers) {
+    await prisma.user.create({
+      data: {
+        ...u,
+        passwordHash: hash,
+        orgId: org1.id,
+        avatarUrl: `https://i.pravatar.cc/150?u=${u.email}`
       }
-    }
+    });
   }
 
-  // Insert mock entries
-  await prisma.timeEntry.createMany({
-    data: mockEntries
+  const stitchProjects = [
+    { id: 'prj-stitch-1', name: 'Stitch Dashboard', color: '#3b82f6', orgId: org1.id },
+    { id: 'prj-stitch-2', name: 'Enterprise API', color: '#8b5cf6', orgId: org1.id },
+  ];
+  for (const p of stitchProjects) await prisma.project.create({ data: p });
+
+  const stitchPhases = ['Discovery', 'Build', 'QA'].map((name, i) => ({
+    id: `phase-stitch-${i}`, name, sortOrder: i, orgId: org1.id
+  }));
+  for (const ph of stitchPhases) await prisma.phase.create({ data: ph });
+
+  await prisma.holiday.create({
+    data: { date: new Date('2026-12-25'), description: 'Stitch Xmas', orgId: org1.id }
   });
 
-  console.log(`✅ Seeded ${mockEntries.length} mock time entries for testing the Super Admin Data Grid`);
+  // --- ORG 2: Velocity Labs ---
+  const org2 = await prisma.organization.create({
+    data: { id: 'org-002', name: 'Velocity Labs' }
+  });
+
+  const velocityUsers = [
+    { id: 'usr-vel-admin', email: 'admin@velocity.com', name: 'Victor Velocity', role: 'ADMIN' as const },
+    { id: 'usr-vel-charlie', email: 'charlie@velocity.com', name: 'Charlie Designer', role: 'USER' as const },
+  ];
+
+  for (const u of velocityUsers) {
+    await prisma.user.create({
+      data: {
+        ...u,
+        passwordHash: hash,
+        orgId: org2.id,
+        avatarUrl: `https://i.pravatar.cc/150?u=${u.email}`
+      }
+    });
+  }
+
+  const velocityProjects = [
+    { id: 'prj-vel-1', name: 'Rocket Propulsion', color: '#ef4444', orgId: org2.id },
+  ];
+  for (const p of velocityProjects) await prisma.project.create({ data: p });
+
+  // --- SUPER ADMIN ---
+  await prisma.user.create({
+    data: {
+      id: 'usr-super',
+      email: 'superadmin@example.com',
+      name: 'Super Admin',
+      role: 'SUPER_ADMIN',
+      passwordHash: hash,
+      orgId: org1.id, // Super admin can belong to any org, but usually the first one
+      avatarUrl: 'https://i.pravatar.cc/150?u=superadmin@example.com'
+    }
+  });
+
+  console.log('✅ Created Organizations, Users, Projects, and Phases');
+
+  // --- WBS SEEDING (Hierarchical) ---
+  const today = new Date();
+  const nextMonth = new Date();
+  nextMonth.setMonth(today.getMonth() + 1);
+
+  // Stitch & Co - Project 1
+  const rootTask = await prisma.plannedTask.create({
+    data: {
+      wbsId: '1.0',
+      taskDescription: 'Project Foundation',
+      plannedHours: 100,
+      startDate: today,
+      endDate: nextMonth,
+      projectId: 'prj-stitch-1',
+      assigneeId: 'usr-stitch-alice',
+      assignedById: 'usr-stitch-admin',
+      status: 'IN_PROGRESS'
+    }
+  });
+
+  await prisma.plannedTask.create({
+    data: {
+      wbsId: '1.1',
+      taskDescription: 'UI Components',
+      plannedHours: 40,
+      startDate: today,
+      endDate: new Date(today.getTime() + 7 * 86400000),
+      projectId: 'prj-stitch-1',
+      phaseId: 'phase-stitch-1',
+      parentId: rootTask.id,
+      assigneeId: 'usr-stitch-alice',
+      assignedById: 'usr-stitch-admin',
+      status: 'IN_PROGRESS'
+    }
+  });
+
+  // Velocity Labs - Project 1
+  await prisma.plannedTask.create({
+    data: {
+      wbsId: '1.0',
+      taskDescription: 'Secret Rocket Plan',
+      plannedHours: 500,
+      startDate: today,
+      endDate: nextMonth,
+      projectId: 'prj-vel-1',
+      assigneeId: 'usr-vel-charlie',
+      assignedById: 'usr-vel-admin',
+      status: 'PENDING'
+    }
+  });
+
+  console.log('✅ Seeded Hierarchical WBS for both Orgs');
+
+  // --- MOCK TIME ENTRIES ---
+  const mockEntries = [];
+  for (let i = 0; i < 5; i++) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    
+    // Stitch Entries
+    mockEntries.push({
+      userId: 'usr-stitch-alice',
+      date: d,
+      hours: 8,
+      taskDescription: 'Building stitch dashboard',
+      projectId: 'prj-stitch-1',
+      phaseId: 'phase-stitch-1',
+      status: 'SUBMITTED' as const
+    });
+
+    // Velocity Entries
+    mockEntries.push({
+      userId: 'usr-vel-charlie',
+      date: d,
+      hours: 4,
+      taskDescription: 'Designing rockets',
+      projectId: 'prj-vel-1',
+      status: 'SUBMITTED' as const
+    });
+  }
+
+  await prisma.timeEntry.createMany({ data: mockEntries });
+  console.log(`✅ Seeded ${mockEntries.length} time entries across organizations`);
+
+  console.log('--- Multi-Tenant Seed Complete ---');
 }
 
 main()

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect, useMemo } from 'react';
 
 interface User {
   id: string;
@@ -8,16 +8,21 @@ interface User {
   avatarUrl?: string;
   orgName?: string;
   orgId?: string;
+  brandColor?: string;
+  logoUrl?: string;
+  theme?: 'dark' | 'light';
 }
 
 interface AuthContextValue {
   user: User | null;
   isAuthenticated: boolean;
   token: string | null;
+  theme: 'dark' | 'light';
   login: (email: string, password: string) => Promise<void>;
   register: (name: string, email: string, password: string, orgName?: string) => Promise<void>;
   logout: () => void;
   updateUser: (updates: Partial<User>) => void;
+  toggleTheme: () => void;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -27,6 +32,10 @@ const API_BASE = '/api';
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
+  const [theme, setTheme] = useState<'dark' | 'light'>(() => {
+    const saved = localStorage.getItem('theme');
+    return (saved as 'dark' | 'light') || 'dark';
+  });
 
   // Restore session on mount
   useEffect(() => {
@@ -42,6 +51,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     }
   }, []);
+
+  // Theme Injection
+  useEffect(() => {
+    if (user?.brandColor) {
+      document.documentElement.style.setProperty('--brand-primary', user.brandColor);
+    } else {
+      document.documentElement.style.setProperty('--brand-primary', '#3b82f6');
+    }
+  }, [user?.brandColor]);
+
+  // Theme Application
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+  }, [theme]);
 
   const login = useCallback(async (email: string, password: string) => {
     const res = await fetch(`${API_BASE}/auth/login`, {
@@ -97,16 +121,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
   }, []);
 
+  const toggleTheme = useCallback(() => {
+    setTheme(prev => prev === 'dark' ? 'light' : 'dark');
+  }, []);
+
+  const value = useMemo(() => ({
+    user,
+    isAuthenticated: !!token && !!user,
+    token,
+    theme,
+    login,
+    register,
+    logout,
+    updateUser,
+    toggleTheme,
+  }), [user, token, theme, login, register, logout, updateUser, toggleTheme]);
+
   return (
-    <AuthContext.Provider value={{
-      user,
-      isAuthenticated: !!token && !!user,
-      token,
-      login,
-      register,
-      logout,
-      updateUser,
-    }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );

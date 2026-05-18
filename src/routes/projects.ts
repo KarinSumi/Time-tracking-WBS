@@ -1,77 +1,65 @@
 import express from 'express';
-import prisma from '../lib/prisma';
 import type { AuthRequest } from '../middleware/auth';
 import { authMiddleware } from '../middleware/auth';
+import { requireFields } from '../middleware/validate';
+import * as ProjectService from '../services/ProjectService';
 
 const router = express.Router();
 
-// GET /api/projects
 router.get('/', authMiddleware, async (req: AuthRequest, res) => {
   try {
-    const user = await prisma.user.findUnique({ where: { id: req.userId! } });
-    if (!user) { res.status(401).json({ error: 'User not found' }); return; }
-
-    const projects = await prisma.project.findMany({
-      where: { orgId: user.orgId },
-      orderBy: { createdAt: 'asc' },
-      include: { _count: { select: { timeEntries: true } } },
-    });
+    const projects = await ProjectService.listProjects(req.orgId!);
     res.json(projects);
   } catch (error) {
-    console.error('Fetch projects error:', error);
     res.status(500).json({ error: 'Failed to fetch projects' });
   }
 });
 
-// POST /api/projects
-router.post('/', authMiddleware, async (req: AuthRequest, res) => {
-  const { name, color } = req.body;
-  if (!name?.trim()) { res.status(400).json({ error: 'Project name is required' }); return; }
-
+router.post('/', authMiddleware, requireFields(['name']), async (req: AuthRequest, res) => {
   try {
-    const user = await prisma.user.findUnique({ where: { id: req.userId! } });
-    if (!user) { res.status(401).json({ error: 'User not found' }); return; }
-
-    const project = await prisma.project.create({
-      data: { name: name.trim(), color: color || '#3b82f6', orgId: user.orgId },
-    });
+    const context = { userId: req.userId!, orgId: req.orgId!, role: req.userRole! };
+    const project = await ProjectService.createProject(req.body, context);
     res.status(201).json(project);
-  } catch (error) {
-    console.error('Create project error:', error);
-    res.status(500).json({ error: 'Failed to create project' });
+  } catch (error: any) {
+    res.status(error.message === 'Unauthorized' ? 403 : 400).json({ error: error.message });
   }
 });
 
-// PUT /api/projects/:id
 router.put('/:id', authMiddleware, async (req: AuthRequest, res) => {
-  const id = req.params.id as string;
-  const { name, color, status } = req.body;
-
   try {
-    const data: Record<string, unknown> = {};
-    if (name !== undefined) data.name = name.trim();
-    if (color !== undefined) data.color = color;
-    if (status !== undefined) data.status = status;
-
-    const project = await prisma.project.update({ where: { id }, data });
+    const context = { userId: req.userId!, orgId: req.orgId!, role: req.userRole! };
+    const project = await ProjectService.updateProject(req.params.id as string, req.body, context);
     res.json(project);
-  } catch (error) {
-    console.error('Update project error:', error);
-    res.status(500).json({ error: 'Failed to update project' });
+  } catch (error: any) {
+    res.status(error.message === 'Unauthorized' ? 403 : 404).json({ error: error.message });
   }
 });
 
-// DELETE /api/projects/:id
 router.delete('/:id', authMiddleware, async (req: AuthRequest, res) => {
-  const id = req.params.id as string;
   try {
-    // Unlink entries first
-    await prisma.timeEntry.updateMany({ where: { projectId: id }, data: { projectId: null } });
-    await prisma.project.delete({ where: { id } });
+    const context = { userId: req.userId!, orgId: req.orgId!, role: req.userRole! };
+    await ProjectService.deleteProject(req.params.id as string, context);
     res.json({ success: true });
-  } catch (error) {
-    console.error('Delete project error:', error);
-    res.status(500).json({ error: 'Failed to delete project' });
+  } catch (error: any) {
+    res.status(error.message?.includes('Only Super Admins') ? 403 : 404).json({ error: error.message });
+  }
+});
+
+router.get('/:id', authMiddleware, async (req: AuthRequest, res) => {
+  try {
+    const project = await ProjectService.getProject(req.params.id as string, req.orgId!);
+    res.json(project);
+  } catch (error: any) {
+    res.status(404).json({ error: error.message });
+  }
+});
+
+router.get('/:id/stats', authMiddleware, async (req: AuthRequest, res) => {
+  try {
+    const stats = await ProjectService.getProjectStats(req.params.id as string, req.orgId!);
+    res.json(stats);
+  } catch (error: any) {
+    res.status(404).json({ error: error.message });
   }
 });
 

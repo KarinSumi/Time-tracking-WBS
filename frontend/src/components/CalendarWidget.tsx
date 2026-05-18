@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { Calendar as CalendarIcon } from 'lucide-react';
-import type { TimeEntry } from './Dashboard';
+import type { TimeEntry } from '../types';
 
 interface CalendarWidgetProps {
   entries: TimeEntry[];
@@ -40,11 +40,10 @@ const CalendarWidget: React.FC<CalendarWidgetProps> = ({ entries, selectedDate, 
     return calendarDays;
   }, [entries]);
 
-  const getColorClass = (hours: number) => {
-    if (hours === 0) return 'bg-white/[0.03] text-white/30 border-white/[0.05] hover:bg-white/[0.08]'; // Grey
-    if (hours < 6) return 'bg-blue-500/20 text-blue-200 border-blue-500/30 hover:bg-blue-500/30'; // Blue
-    if (hours <= 9) return 'bg-green-500/20 text-green-200 border-green-500/30 hover:bg-green-500/30'; // Green
-    return 'bg-red-500/20 text-red-200 border-red-500/30 hover:bg-red-500/30'; // Red
+  const getColorClass = (hours: number, isSelected: boolean) => {
+    if (isSelected) return 'bg-black text-white border-black shadow-lg z-10 scale-105';
+    if (hours === 0) return 'text-[var(--text-faint)] hover:bg-[var(--bg-surface-hover)] border-transparent';
+    return 'bg-[var(--bg-surface-hover)] text-[var(--text-primary)] border-[var(--border-subtle)] hover:border-[var(--text-faint)]';
   };
 
   const monthName = new Date().toLocaleDateString('default', { month: 'long', year: 'numeric' });
@@ -52,18 +51,18 @@ const CalendarWidget: React.FC<CalendarWidgetProps> = ({ entries, selectedDate, 
   return (
     <div className="h-full flex flex-col">
       <div className="flex items-center justify-between mb-5">
-        <h2 className="text-[11px] font-semibold text-white/35 uppercase tracking-widest flex items-center gap-2">
-          <CalendarIcon size={13} className="text-white/25" />
+        <h2 className="text-[11px] font-semibold text-[var(--text-muted)] uppercase tracking-widest flex items-center gap-2">
+          <CalendarIcon size={13} className="text-[var(--text-faint)]" />
           Calendar
         </h2>
-        <span className="text-[10px] text-white/30 font-medium">{monthName}</span>
+        <span className="text-[10px] text-[var(--text-muted)] font-medium">{monthName}</span>
       </div>
       
       <div className="flex-1 flex flex-col">
         {/* Days of week */}
         <div className="grid grid-cols-7 gap-2 mb-3">
           {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map(d => (
-            <div key={d} className="text-[9px] font-semibold text-white/20 text-center uppercase">{d}</div>
+            <div key={d} className="text-[9px] font-semibold text-[var(--text-faint)] text-center uppercase">{d}</div>
           ))}
         </div>
         
@@ -79,24 +78,24 @@ const CalendarWidget: React.FC<CalendarWidgetProps> = ({ entries, selectedDate, 
                 key={dayObj.dateStr}
                 onClick={() => onSelectDate(dayObj.dateStr)}
                 className={`
-                  relative aspect-square flex items-center justify-center rounded-lg border text-sm font-medium transition-all
-                  ${getColorClass(dayObj.hours)}
-                  ${isSelected ? 'ring-2 ring-white shadow-[0_0_12px_rgba(255,255,255,0.2)] z-10' : ''}
+                  relative aspect-square flex items-center justify-center rounded-xl border text-[11px] font-bold transition-all duration-200
+                  ${getColorClass(dayObj.hours, isSelected)}
                 `}
                 title={`${dayObj.hours} hours logged`}
               >
                 {dayObj.day}
+                {dayObj.hours > 0 && !isSelected && (
+                  <div className="absolute bottom-1 w-1 h-1 rounded-full bg-blue-500" />
+                )}
               </button>
             );
           })}
         </div>
         
         {/* Legend */}
-        <div className="mt-4 pt-4 border-t border-white/[0.04] flex items-center justify-between gap-2 text-[9px] text-white/30 uppercase tracking-widest">
-          <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-sm bg-white/10" /> 0h</div>
-          <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-sm bg-blue-500/40" /> &lt;6h</div>
-          <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-sm bg-green-500/40" /> 6-9h</div>
-          <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-sm bg-red-500/40" /> &gt;9h</div>
+        <div className="mt-4 pt-4 border-t border-[var(--border-subtle)] flex items-center justify-between text-[8px] font-black text-[var(--text-faint)] uppercase tracking-widest">
+          <div className="flex items-center gap-1.5"><div className="w-1.5 h-1.5 rounded-full bg-[var(--bg-surface-hover)]" /> No activity</div>
+          <div className="flex items-center gap-1.5"><div className="w-1.5 h-1.5 rounded-full bg-blue-500" /> Logged</div>
         </div>
       </div>
     </div>
