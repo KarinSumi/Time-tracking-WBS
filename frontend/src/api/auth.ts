@@ -5,3 +5,4 @@ export const login = (data: any) => apiFetch<{ token: string; user: User }>('/au
 export const register = (data: any) => apiFetch<{ token: string; user: User }>('/auth/register', { method: 'POST', body: JSON.stringify(data) });
 export const getMe = () => apiFetch<User>('/auth/me');
 export const uploadAvatar = (formData: FormData) => apiFetch<{ avatarUrl: string }>('/auth/profile/avatar', { method: 'POST', body: formData });
+export const bulkRegisterUsers = (formData: FormData) => apiFetch<{ created: number; skipped: number; errors: string[] }>('/auth/bulk-register', { method: 'POST', body: formData });

@@ -9,6 +9,9 @@ export interface User {
   brandColor?: string;
   logoUrl?: string;
   hoursLogged?: number;
+  managerId?: string;
+  manager?: { id: string; name: string };
+  reports?: { id: string; name: string }[];
 }
 
 export interface Project {

@@ -59,4 +59,22 @@ describe('Auth API', () => {
     expect(res.status).toBe(200);
     expect(res.body).toHaveProperty('email', user.email);
   });
+
+  it('should bulk register users', async () => {
+    const { token, user: adminUser } = await createTestUser('ADMIN');
+    
+    // Create a simple CSV buffer instead of full XLSX to test the parsing logic if multer supports CSV, 
+    // but the endpoint uses xlsx library which handles CSV as well.
+    const csvContent = `Name,Email,Role,Manager Email\nBulk User 1,bulk1@example.com,USER,\nBulk User 2,bulk2@example.com,MANAGER,${adminUser.email}`;
+    const fileBuffer = Buffer.from(csvContent);
+
+    const res = await request(app)
+      .post('/api/auth/bulk-register')
+      .set('Authorization', `Bearer ${token}`)
+      .attach('file', fileBuffer, 'users.csv');
+
+    expect(res.status).toBe(200);
+    expect(res.body).toHaveProperty('created', 2);
+    expect(res.body).toHaveProperty('skipped', 0);
+  });
 });

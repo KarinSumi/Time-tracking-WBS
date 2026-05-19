@@ -4,7 +4,15 @@ import { createAuditLog } from '../utils/utils';
 export async function listOrgUsers(orgId: string) {
   return await prisma.user.findMany({
     where: { orgId },
-    select: { id: true, name: true, email: true, avatarUrl: true, role: true },
+    select: { 
+      id: true, 
+      name: true, 
+      email: true, 
+      avatarUrl: true, 
+      role: true,
+      manager: { select: { id: true, name: true } },
+      reports: { select: { id: true, name: true } }
+    },
     orderBy: { name: 'asc' },
   });
 }
@@ -41,4 +49,32 @@ export async function getUser(id: string) {
     where: { id },
     include: { organization: true }
   });
+}
+
+export async function updateUserManager(id: string, managerId: string | null, orgId: string, performedBy: string) {
+  const targetUser = await prisma.user.findUnique({ where: { id } });
+  if (!targetUser || targetUser.orgId !== orgId) throw new Error('User not found');
+
+  if (managerId) {
+    if (managerId === id) throw new Error('A user cannot be their own manager');
+    const manager = await prisma.user.findUnique({ where: { id: managerId } });
+    if (!manager || manager.orgId !== orgId) throw new Error('Manager not found in this organization');
+  }
+
+  const updatedUser = await prisma.user.update({
+    where: { id },
+    data: { managerId },
+    select: { id: true, name: true, email: true, managerId: true }
+  });
+
+  await createAuditLog(prisma, {
+    entityType: 'User',
+    entityId: id,
+    action: 'UPDATE_MANAGER',
+    performedBy,
+    oldValues: { managerId: targetUser.managerId } as any,
+    newValues: { managerId: updatedUser.managerId } as any
+  });
+
+  return updatedUser;
 }

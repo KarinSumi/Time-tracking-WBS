@@ -38,6 +38,9 @@ model User {
   assignedPlans PlannedTask[] @relation("AssignedTasks")
   timeEntries   TimeEntry[]
   organization  Organization  @relation(fields: [orgId], references: [id])
+  managerId     String?
+  manager       User?         @relation("ManagerToReports", fields: [managerId], references: [id])
+  reports       User[]        @relation("ManagerToReports")
 }
 
 model Project {

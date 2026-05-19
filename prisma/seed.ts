@@ -25,8 +25,8 @@ async function main() {
 
   const stitchUsers = [
     { id: 'usr-stitch-admin', email: 'admin@stitch.com', name: 'John Stitch', role: 'ADMIN' as const },
-    { id: 'usr-stitch-alice', email: 'alice@stitch.com', name: 'Alice Frontend', role: 'USER' as const },
-    { id: 'usr-stitch-bob', email: 'bob@stitch.com', name: 'Bob Backend', role: 'USER' as const },
+    { id: 'usr-stitch-alice', email: 'alice@stitch.com', name: 'Alice Frontend', role: 'USER' as const, managerId: 'usr-stitch-admin' },
+    { id: 'usr-stitch-bob', email: 'bob@stitch.com', name: 'Bob Backend', role: 'USER' as const, managerId: 'usr-stitch-admin' },
   ];
 
   for (const u of stitchUsers) {
@@ -62,7 +62,7 @@ async function main() {
 
   const velocityUsers = [
     { id: 'usr-vel-admin', email: 'admin@velocity.com', name: 'Victor Velocity', role: 'ADMIN' as const },
-    { id: 'usr-vel-charlie', email: 'charlie@velocity.com', name: 'Charlie Designer', role: 'USER' as const },
+    { id: 'usr-vel-charlie', email: 'charlie@velocity.com', name: 'Charlie Designer', role: 'USER' as const, managerId: 'usr-vel-admin' },
   ];
 
   for (const u of velocityUsers) {

@@ -2,7 +2,9 @@ import express from 'express';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
 import multer from 'multer';
 import path from 'path';
-import { login, register, getMe, updateAvatar } from '../services/AuthService';
+import { login, register, getMe, updateAvatar, bulkRegister, BulkUserRow } from '../services/AuthService';
+import { requireAdmin } from '../middleware/tenant';
+import * as xlsx from 'xlsx';
 
 const router = express.Router();
 
@@ -97,6 +99,46 @@ router.post('/profile/avatar', authMiddleware, upload.single('avatar'), async (r
   } catch (error) {
     console.error('Avatar upload error:', error);
     res.status(500).json({ error: 'Failed to update avatar' });
+  }
+});
+
+// Bulk upload configuration
+const excelUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+  fileFilter: (req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase();
+    if (ext === '.xlsx' || ext === '.xls' || ext === '.csv') cb(null, true);
+    else cb(new Error('Only Excel or CSV files are allowed'));
+  }
+});
+
+router.post('/bulk-register', authMiddleware, requireAdmin, excelUpload.single('file'), async (req: AuthRequest, res) => {
+  if (!req.file) {
+    res.status(400).json({ error: 'No file uploaded' });
+    return;
+  }
+
+  try {
+    const workbook = xlsx.read(req.file.buffer, { type: 'buffer' });
+    const sheetName = workbook.SheetNames[0];
+    if (!sheetName) throw new Error('Excel file has no sheets');
+    const sheet = workbook.Sheets[sheetName];
+    if (!sheet) throw new Error('Failed to read sheet');
+    const rawData = xlsx.utils.sheet_to_json(sheet) as any[];
+
+    const rows: BulkUserRow[] = rawData.map(row => ({
+      name: row['Name'] || row['name'],
+      email: row['Email'] || row['email'],
+      role: row['Role'] || row['role'],
+      managerEmail: row['Manager Email'] || row['managerEmail']
+    })).filter(row => row.name && row.email); // Basic filter for empty rows
+
+    const result = await bulkRegister(rows, req.orgId!, req.userId!);
+    res.json(result);
+  } catch (error: any) {
+    console.error('Bulk register error:', error);
+    res.status(500).json({ error: 'Failed to process bulk registration' });
   }
 });
 

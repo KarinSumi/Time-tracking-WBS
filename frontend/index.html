@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -7,6 +7,16 @@
     <meta name="description" content="Aion — Beautiful, modern time tracking for teams. Log hours, track projects, and gain productivity insights." />
     <meta name="theme-color" content="#050505" />
     <title>Aion — Time Tracking</title>
+    <!-- Force dark mode immediately, before React boots. Reads localStorage to respect saved preference, but dark is the hard default. -->
+    <script>
+      try {
+        var t = localStorage.getItem('theme');
+        document.documentElement.setAttribute('data-theme', t === 'light' ? 'light' : 'dark');
+        if (!t) localStorage.setItem('theme', 'dark');
+      } catch(e) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />

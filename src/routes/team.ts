@@ -28,4 +28,15 @@ router.patch('/:id/role', requireAdmin, async (req: AuthRequest, res) => {
   }
 });
 
+router.patch('/:id/manager', requireAdmin, async (req: AuthRequest, res) => {
+  try {
+    const { id } = req.params;
+    const { managerId } = req.body;
+    const updated = await UserService.updateUserManager(id as string, managerId, req.orgId!, req.userId!);
+    res.json(updated);
+  } catch (error: any) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
 export default router;
