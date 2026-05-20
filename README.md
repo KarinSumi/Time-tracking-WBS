@@ -1,50 +1,65 @@
 # Aion Enterprise Time Logger
 
+🌐 **Select Language**: English | [ภาษาไทย (Thai)](README.th.md)
+
 Welcome to the **Aion Enterprise Time Logger** — a comprehensive enterprise portfolio management platform designed for precision time logging, strategic project planning, resource intelligence, and enterprise administration.
+
+---
+
+## 📖 Developer & Design Documentation
+
+For a detailed explanation of the code, database schema, multi-tenant isolation, and backend services pattern:
+👉 **[Developer Documentation & System Design](DEVELOPER.md)**
+
+---
+
+## ⚡ 1-Line Installation (Windows, Linux, Mac)
+
+Ensure you have **Node.js** and **Git** installed on your system. Run the appropriate command in your terminal to clone the repository and set up the entire workspace automatically:
+
+### Linux / macOS:
+```bash
+git clone https://github.com/KarinSumi/Time-tracking-WBS.git && cd Time-tracking-WBS && node setup.js
+```
+
+### Windows (PowerShell):
+```powershell
+git clone https://github.com/KarinSumi/Time-tracking-WBS.git; cd Time-tracking-WBS; node setup.js
+```
+
+*This automated script installs all dependencies, restores the sample database, and compiles the application.*
 
 ---
 
 ## 💾 Instant Tryout with Sample Database
 
-For users wishing to instantly test and explore the system with populated data (pre-configured organizations, team members, WBS plans, and time logs):
+To reset the database at any time to the default demo state (with pre-seeded organizations, users, Gantt plans, and time logs):
 
 1. **Restore Sample Database**:
    ```bash
    npm run db:restore-sample
    ```
-   *This copies our pre-packaged `prisma/sample.db` directly to `prisma/dev.db`.*
-
 2. **Run the Application**:
    ```bash
    npm run dev
    ```
 
-3. **Login Credentials**:
-   - **Super Admin**: `superadmin@example.com` / `password123`
-   - **Stitch & Co (Org Admin)**: `admin@stitch.com` / `password123`
-   - **Stitch & Co (Team Member)**: `alice@stitch.com` / `password123`
+### Demo Login Credentials:
+- **Super Admin**: `superadmin@example.com` / `password123`
+- **Stitch & Co (Org Admin)**: `admin@stitch.com` / `password123`
+- **Stitch & Co (Team Member)**: `alice@stitch.com` / `password123`
 
 ---
 
-## 📖 Interactive Bilingual User Manual
+## 🎥 Walkthrough Chapters & Step-by-Step Guides
 
-An interactive, bilingual (EN/TH) glassmorphic user manual is built directly into the application.
-
-### How to access:
-1. Start the dev server: `npm run dev`
-2. Visit: **[http://localhost:5173/tutorial/manual.html](http://localhost:5173/tutorial/manual.html)**
-3. Alternatively, double-click/open `frontend/public/tutorial/manual.html` in your web browser.
-
----
-
-## 🎥 Feature Walkthroughs & Step-by-Step Guides
-
-Below are the 8 core operational chapters. Each contains a native video walkthrough and the precise steps to replicate the actions.
+Below are the 8 core operational chapters. Each contains an auto-playing visual demo walkthrough and the click-by-click instructions to reproduce the actions.
 
 ### 1. Account Registration (All Users)
 Register a company, create a profile, and log in to the workspace.
 
-<video src="frontend/public/tutorial/assets/01_register_account.mp4" width="100%" controls loop muted></video>
+![Account Registration](frontend/public/tutorial/assets/01_register_account.webp)
+🎬 **[Watch MP4 Walkthrough Video](frontend/public/tutorial/assets/01_register_account.mp4)**
 
 #### Steps to replicate:
 1. Click the **Register** link at the bottom of the login page.
@@ -58,7 +73,8 @@ Register a company, create a profile, and log in to the workspace.
 ### 2. Dashboard Navigation (All Users)
 Understand widgets, active assignments, and the work logs calendar.
 
-<video src="frontend/public/tutorial/assets/02_login_dashboard.mp4" width="100%" controls loop muted></video>
+![Dashboard Navigation](frontend/public/tutorial/assets/02_login_dashboard.webp)
+🎬 **[Watch MP4 Walkthrough Video](frontend/public/tutorial/assets/02_login_dashboard.mp4)**
 
 #### Steps to replicate:
 1. Observe the **Weekly Timesheet widget** showing total hours logged for the current week.
@@ -72,7 +88,8 @@ Understand widgets, active assignments, and the work logs calendar.
 ### 3. Project & Workspace Setup (Administrators)
 Create projects and divide them into phases.
 
-<video src="frontend/public/tutorial/assets/03_project_setup.mp4" width="100%" controls loop muted></video>
+![Project Setup](frontend/public/tutorial/assets/03_project_setup.webp)
+🎬 **[Watch MP4 Walkthrough Video](frontend/public/tutorial/assets/03_project_setup.mp4)**
 
 #### Steps to replicate:
 1. Navigate to the **Projects** page in the left sidebar.
@@ -86,7 +103,8 @@ Create projects and divide them into phases.
 ### 4. Work Breakdown Structure - WBS (Administrators)
 Construct hierarchical plans and timeline Gantt charts.
 
-<video src="frontend/public/tutorial/assets/04_task_planning.mp4" width="100%" controls loop muted></video>
+![Task Planning](frontend/public/tutorial/assets/04_task_planning.webp)
+🎬 **[Watch MP4 Walkthrough Video](frontend/public/tutorial/assets/04_task_planning.mp4)**
 
 #### Steps to replicate:
 1. Navigate to the **Plans** page in the left sidebar.
@@ -101,7 +119,8 @@ Construct hierarchical plans and timeline Gantt charts.
 ### 5. Team & Member Onboarding (Administrators)
 Onboard your team roster in bulk.
 
-<video src="frontend/public/tutorial/assets/05_bulk_upload.mp4" width="100%" controls loop muted></video>
+![Team Onboarding](frontend/public/tutorial/assets/05_bulk_upload.webp)
+🎬 **[Watch MP4 Walkthrough Video](frontend/public/tutorial/assets/05_bulk_upload.mp4)**
 
 #### Steps to replicate:
 1. Go to the **Team** page from the sidebar navigation.
@@ -116,7 +135,8 @@ Onboard your team roster in bulk.
 ### 6. Time Logging & Submissions (All Users)
 Submit operational work logs for review.
 
-<video src="frontend/public/tutorial/assets/06_time_logging.mp4" width="100%" controls loop muted></video>
+![Time Logging](frontend/public/tutorial/assets/06_time_logging.webp)
+🎬 **[Watch MP4 Walkthrough Video](frontend/public/tutorial/assets/06_time_logging.mp4)**
 
 #### Steps to replicate:
 1. Locate the **Quick Log Time** widget on the Dashboard.
@@ -130,7 +150,8 @@ Submit operational work logs for review.
 ### 7. Resource Analytics & Heatmaps (Administrators)
 Track team capacity, over-allocation, and utilization.
 
-<video src="frontend/public/tutorial/assets/07_analytics_reports.mp4" width="100%" controls loop muted></video>
+![Analytics Reports](frontend/public/tutorial/assets/07_analytics_reports.webp)
+🎬 **[Watch MP4 Walkthrough Video](frontend/public/tutorial/assets/07_analytics_reports.mp4)**
 
 #### Steps to replicate:
 1. Click **Reports** in the sidebar navigation, then choose the **Capacity** tab.
@@ -154,24 +175,3 @@ Customize logos and branding accents organization-wide.
 3. Set your preferred corporate theme color hex code (e.g., `#ff5722` for orange).
 4. Upload your company's **Logo** image file.
 5. Click **Save Customization** and observe the header logo and theme colors update instantly.
-
----
-
-## 🛠️ Project Structure
-
-- **`/frontend`**: React + Vite + TypeScript frontend.
-  - API Client: `/frontend/src/api/client.ts`
-  - Tutorial Assets: `/frontend/public/tutorial/`
-- **`/src`**: Node.js + Express backend.
-  - Business Logic: `/src/services/`
-- **Database**: Prisma + SQLite
-
----
-
-## 🧪 Development & Testing
-
-- **Install Dependencies:** `npm install`
-- **Restore Sample DB:** `npm run db:restore-sample`
-- **Run Dev Server:** `npm run dev` (Concurrent backend + frontend)
-- **Run Tests:** `npm run test` (Vitest + Supertest)
-- **Build Project:** `npm run build`
