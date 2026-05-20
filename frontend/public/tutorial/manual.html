@@ -9,12 +9,17 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #08080f;
-            --glass: rgba(255, 255, 255, 0.03);
-            --border: rgba(255, 255, 255, 0.08);
+            --bg: #05050a;
+            --glass: rgba(255, 255, 255, 0.02);
+            --glass-hover: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.06);
             --accent: #3b82f6;
-            --text: #ffffff;
-            --text-muted: rgba(255, 255, 255, 0.4);
+            --accent-glow: rgba(59, 130, 246, 0.12);
+            --text: #f3f4f6;
+            --text-muted: #9ca3af;
+            --badge-all: #10b981;
+            --badge-admin: #3b82f6;
+            --badge-super: #8b5cf6;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -24,74 +29,122 @@
             font-family: 'Inter', sans-serif;
             line-height: 1.6;
             overflow-x: hidden;
+            display: flex;
         }
 
-        /* Background Glows */
+        /* Glassmorphic Background Glows */
         .glow {
             position: fixed;
-            width: 800px;
-            height: 800px;
+            width: 600px;
+            height: 600px;
             border-radius: 50%;
-            background: radial-gradient(circle, rgba(59, 130, 246, 0.08) 0%, transparent 70%);
+            background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
             z-index: -1;
             filter: blur(80px);
+            pointer-events: none;
         }
-        .glow-1 { top: -200px; right: -200px; }
-        .glow-2 { bottom: -200px; left: -200px; }
+        .glow-1 { top: -100px; right: -100px; }
+        .glow-2 { bottom: -100px; left: -100px; }
 
-        header {
+        /* Sidebar Navigation */
+        aside {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 320px;
             height: 100vh;
+            background: rgba(5, 5, 10, 0.8);
+            border-right: 1px solid var(--border);
+            backdrop-filter: blur(20px);
+            padding: 2.5rem 2rem;
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            padding: 2rem;
-            background: radial-gradient(circle at center, rgba(10, 10, 20, 0) 0%, var(--bg) 100%);
+            justify-content: space-between;
+            z-index: 100;
         }
 
-        h1 {
+        .brand-section h1 {
             font-family: 'Outfit', sans-serif;
-            font-size: 5rem;
+            font-size: 1.8rem;
             font-weight: 800;
-            letter-spacing: -0.04em;
-            background: linear-gradient(to bottom, #fff 40%, rgba(255,255,255,0.4) 100%);
+            background: linear-gradient(135deg, #fff 0%, var(--text-muted) 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            margin-bottom: 1rem;
+            margin-bottom: 0.5rem;
         }
 
-        .subtitle {
-            font-size: 1.25rem;
+        .brand-section p {
+            font-size: 0.8rem;
             color: var(--text-muted);
-            max-width: 600px;
-            margin-bottom: 3rem;
-            letter-spacing: 0.02em;
-        }
-
-        .btn-scroll {
-            background: var(--accent);
-            color: white;
-            padding: 1rem 2.5rem;
-            border-radius: 100px;
-            text-decoration: none;
-            font-weight: 700;
-            font-size: 0.9rem;
             text-transform: uppercase;
             letter-spacing: 0.1em;
-            box-shadow: 0 10px 40px rgba(59, 130, 246, 0.3);
-            transition: all 0.3s ease;
         }
 
-        .btn-scroll:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 20px 60px rgba(59, 130, 246, 0.5);
+        .nav-menu {
+            list-style: none;
+            margin: 2.5rem 0;
+            flex-grow: 1;
+            overflow-y: auto;
         }
 
+        .nav-item {
+            margin-bottom: 0.75rem;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            border-radius: 0.75rem;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: #fff;
+            background: var(--glass-hover);
+            border-color: var(--border);
+            transform: translateX(4px);
+        }
+
+        .lang-toggle-container {
+            display: flex;
+            gap: 0.5rem;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 0.25rem;
+            border-radius: 100px;
+            border: 1px solid var(--border);
+        }
+
+        .lang-btn {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            padding: 0.5rem;
+            font-weight: 700;
+            font-size: 0.75rem;
+            border-radius: 100px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .lang-btn.active {
+            background: var(--accent);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        /* Main Content Workspace */
         main {
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 4rem 2rem;
+            margin-left: 320px;
+            padding: 4rem 5rem;
+            max-width: 1200px;
+            width: calc(100% - 320px);
         }
 
         section {
@@ -99,132 +152,90 @@
             scroll-margin-top: 4rem;
         }
 
-        .section-tag {
-            color: var(--accent);
-            font-size: 0.75rem;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 0.2em;
-            display: block;
+        .module-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
             margin-bottom: 1rem;
         }
+
+        .module-tag {
+            font-size: 0.75rem;
+            font-weight: 800;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+        }
+
+        .role-badge {
+            font-size: 0.65rem;
+            font-weight: 800;
+            padding: 0.25rem 0.75rem;
+            border-radius: 100px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .role-all { background: rgba(16, 185, 129, 0.1); color: var(--badge-all); border: 1px solid rgba(16, 185, 129, 0.2); }
+        .role-admin { background: rgba(59, 130, 246, 0.1); color: var(--badge-admin); border: 1px solid rgba(59, 130, 246, 0.2); }
+        .role-super { background: rgba(139, 92, 246, 0.1); color: var(--badge-super); border: 1px solid rgba(139, 92, 246, 0.2); }
 
         h2 {
             font-family: 'Outfit', sans-serif;
-            font-size: 2.5rem;
-            margin-bottom: 1.5rem;
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
             letter-spacing: -0.02em;
         }
 
-        p {
-            color: rgba(255,255,255,0.7);
-            margin-bottom: 2rem;
-            font-size: 1.1rem;
-        }
-
-        .card-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-        }
-
-        .feature-card {
-            background: var(--glass);
-            border: 1px solid var(--border);
-            padding: 2.5rem;
-            border-radius: 2rem;
-            backdrop-filter: blur(20px);
-            transition: all 0.3s ease;
-        }
-
-        .feature-card:hover {
-            border-color: rgba(255,255,255,0.2);
-            background: rgba(255,255,255,0.05);
-            transform: translateY(-5px);
-        }
-
-        .feature-card h3 {
-            font-size: 1.25rem;
-            margin-bottom: 1rem;
-            color: #fff;
-        }
-
-        .feature-card p {
-            font-size: 0.95rem;
-            margin-bottom: 0;
+        .module-desc {
+            font-size: 1.05rem;
             color: var(--text-muted);
+            margin-bottom: 2rem;
+            max-width: 800px;
+        }
+
+        .media-container {
+            position: relative;
+            width: 100%;
+            border-radius: 1.5rem;
+            border: 1px solid var(--border);
+            background: #000;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            aspect-ratio: 1280/800;
         }
 
         .walkthrough-media {
             width: 100%;
-            border-radius: 2rem;
-            border: 1px solid var(--border);
-            margin-top: 2.5rem;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+            height: 100%;
+            object-fit: cover;
             display: block;
-            background: #000;
-            overflow: hidden;
-            transition: border-color 0.3s ease;
         }
 
-        .walkthrough-media:hover {
-            border-color: rgba(255, 255, 255, 0.25);
-        }
+        /* Language visibility rules */
+        [lang="th"] { display: none; }
+        html[lang="th"] [lang="en"] { display: none; }
+        html[lang="th"] [lang="th"] { display: block; }
+        html[lang="th"] span[lang="th"] { display: inline-block; }
 
-        footer {
-            padding: 6rem 2rem;
-            text-align: center;
-            border-top: 1px solid var(--border);
-            color: var(--text-muted);
-            font-size: 0.85rem;
-        }
-
-        nav {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            padding: 1.5rem 3rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 100;
-            background: rgba(8, 8, 15, 0.5);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--border);
-        }
-
-        .nav-logo {
-            font-family: 'Outfit', sans-serif;
-            font-weight: 800;
-            font-size: 1.5rem;
-            text-decoration: none;
-            color: #fff;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 2rem;
-        }
-
-        .nav-links a {
-            text-decoration: none;
-            color: var(--text-muted);
-            font-size: 0.85rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            transition: color 0.3s ease;
-        }
-
-        .nav-links a:hover {
-            color: #fff;
-        }
-
-        @media (max-width: 768px) {
-            h1 { font-size: 3rem; }
-            nav { padding: 1rem 1.5rem; }
-            .nav-links { display: none; }
+        @media (max-width: 1024px) {
+            body { flex-direction: column; }
+            aside {
+                position: relative;
+                width: 100%;
+                height: auto;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+                padding: 1.5rem;
+            }
+            .nav-menu { display: none; }
+            main {
+                margin-left: 0;
+                width: 100%;
+                padding: 2rem;
+            }
+            section { margin-bottom: 4rem; }
         }
     </style>
 </head>
@@ -232,125 +243,239 @@
     <div class="glow glow-1"></div>
     <div class="glow glow-2"></div>
 
-    <nav>
-        <a href="#" class="nav-logo">AION</a>
-        <div class="nav-links">
-            <a href="#logging">Logging</a>
-            <a href="#planning">Planning</a>
-            <a href="#intelligence">Intelligence</a>
-            <a href="#admin">Admin</a>
+    <aside>
+        <div class="brand-section">
+            <h1>AION</h1>
+            <p lang="en">User Manual</p>
+            <p lang="th">คู่มือการใช้งาน</p>
         </div>
-    </nav>
 
-    <header>
-        <span class="section-tag">Enterprise Portfolio Intelligence</span>
-        <h1>Master Aion</h1>
-        <p class="subtitle">The definitive guide to optimizing your organizational workflow, resource capacity, and strategic delivery.</p>
-        <a href="#logging" class="btn-scroll">Begin Walkthrough</a>
-    </header>
+        <ul class="nav-menu">
+            <li class="nav-item">
+                <a href="#register" class="nav-link active">
+                    <span lang="en">01. Registration</span>
+                    <span lang="th">01. การลงทะเบียน</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#dashboard" class="nav-link">
+                    <span lang="en">02. Dashboard Navigation</span>
+                    <span lang="th">02. ภาพรวมแดชบอร์ด</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#projects" class="nav-link">
+                    <span lang="en">03. Project Setup</span>
+                    <span lang="th">03. การตั้งค่าโครงการ</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#wbs" class="nav-link">
+                    <span lang="en">04. Task Planning (WBS)</span>
+                    <span lang="th">04. โครงสร้างแบ่งงาน (WBS)</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#onboarding" class="nav-link">
+                    <span lang="en">05. Team Onboarding</span>
+                    <span lang="th">05. การจัดการทีม</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#logging" class="nav-link">
+                    <span lang="en">06. Time Logging</span>
+                    <span lang="th">06. การบันทึกเวลา</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#analytics" class="nav-link">
+                    <span lang="en">07. Capacity Analytics</span>
+                    <span lang="th">07. การวิเคราะห์ทรัพยากร</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#branding" class="nav-link">
+                    <span lang="en">08. Superadmin Config</span>
+                    <span lang="th">08. การตั้งค่าแบรนด์</span>
+                </a>
+            </li>
+        </ul>
+
+        <div class="lang-toggle-container">
+            <button class="lang-btn active" onclick="setLanguage('en', this)">EN</button>
+            <button class="lang-btn" onclick="setLanguage('th', this)">TH</button>
+        </div>
+    </aside>
 
     <main>
+        <!-- Module 01 -->
+        <section id="register">
+            <div class="module-header">
+                <span class="module-tag">Module 01</span>
+                <span class="role-badge role-all" lang="en">ALL</span>
+                <span class="role-badge role-all" lang="th">ผู้ใช้ทุกคน</span>
+            </div>
+            <h2 lang="en">Account Registration</h2>
+            <h2 lang="th">การลงทะเบียนบัญชีผู้ใช้</h2>
+            <p class="module-desc" lang="en">Create a new user profile, register your company instance, and onboard safely to the workspace environment.</p>
+            <p class="module-desc" lang="th">ขั้นตอนการสร้างบัญชีผู้ใช้ใหม่ ลงทะเบียนเปิดสิทธิ์การใช้งานองค์กร และการเข้าสู่ระบบรักษาความปลอดภัยเบื้องต้น</p>
+            <div class="media-container">
+                <img src="assets/01_register_account.webp" alt="Account Registration Walkthrough" class="walkthrough-media" />
+            </div>
+        </section>
+
+        <!-- Module 02 -->
+        <section id="dashboard">
+            <div class="module-header">
+                <span class="module-tag">Module 02</span>
+                <span class="role-badge role-all" lang="en">ALL</span>
+                <span class="role-badge role-all" lang="th">ผู้ใช้ทุกคน</span>
+            </div>
+            <h2 lang="en">Dashboard Navigation</h2>
+            <h2 lang="th">ภาพรวมหน้าจอแดชบอร์ด</h2>
+            <p class="module-desc" lang="en">Familiarize yourself with timesheet widgets, active tasks indicators, visual work calendar, and general menu operations.</p>
+            <p class="module-desc" lang="th">แนะนำการทำงานของแดชบอร์ดหลัก เช่น หน้าต่างลงเวลาด่วน ปฏิทินแสดงรอบเวลางาน และการนำทางเมนูทั่วไป</p>
+            <div class="media-container">
+                <img src="assets/02_login_dashboard.webp" alt="Dashboard Navigation Walkthrough" class="walkthrough-media" />
+            </div>
+        </section>
+
+        <!-- Module 03 -->
+        <section id="projects">
+            <div class="module-header">
+                <span class="module-tag">Module 03</span>
+                <span class="role-badge role-admin" lang="en">ADMIN</span>
+                <span class="role-badge role-admin" lang="th">ผู้ดูแลระบบ</span>
+            </div>
+            <h2 lang="en">Project & Workspace Setup</h2>
+            <h2 lang="th">การสร้างและตั้งค่าโครงการ</h2>
+            <p class="module-desc" lang="en">Initiate client projects, partition projects into strategic stages, set up resource pools, and allocate development tasks.</p>
+            <p class="module-desc" lang="th">ขั้นตอนการจัดทำโครงการลูกค้า กำหนดระยะเวลาการดำเนินงานแต่ละระยะ จัดสรรกำลังคน และมอบหมายชิ้นงานหลัก</p>
+            <div class="media-container">
+                <img src="assets/03_project_setup.webp" alt="Project Setup Walkthrough" class="walkthrough-media" />
+            </div>
+        </section>
+
+        <!-- Module 04 -->
+        <section id="wbs">
+            <div class="module-header">
+                <span class="module-tag">Module 04</span>
+                <span class="role-badge role-admin" lang="en">ADMIN</span>
+                <span class="role-badge role-admin" lang="th">ผู้ดูแลระบบ</span>
+            </div>
+            <h2 lang="en">Work Breakdown Structure (WBS)</h2>
+            <h2 lang="th">โครงสร้างการแบ่งงาน (WBS) และแผนภูมิแกนต์</h2>
+            <p class="module-desc" lang="en">Structure hierarchical tasks, enforce task dependencies, configure plan estimations, and inspect the Gantt timeline.</p>
+            <p class="module-desc" lang="th">สร้างผังการแบ่งงานลำดับย่อย กำหนดการเชื่อมต่อและความสัมพันธ์ระหว่างงาน วางแผนปริมาณกำลังคน และดูภาพรวมผ่านแผนภูมิแกนต์</p>
+            <div class="media-container">
+                <img src="assets/04_task_planning.webp" alt="Task Planning Walkthrough" class="walkthrough-media" />
+            </div>
+        </section>
+
+        <!-- Module 05 -->
+        <section id="onboarding">
+            <div class="module-header">
+                <span class="module-tag">Module 05</span>
+                <span class="role-badge role-admin" lang="en">ADMIN</span>
+                <span class="role-badge role-admin" lang="th">ผู้ดูแลระบบ</span>
+            </div>
+            <h2 lang="en">Team & Member Onboarding</h2>
+            <h2 lang="th">การจัดการทีมงานและนำเข้าข้อมูล</h2>
+            <p class="module-desc" lang="en">Import corporate members using standardized Excel spreadsheets, maintain manager reporting relationships, and customize team structure.</p>
+            <p class="module-desc" lang="th">การลงทะเบียนสมาชิกทีมจำนวนมากผ่านไฟล์เทมเพลต Excel จัดความสัมพันธ์การขึ้นตรงต่อหัวหน้าทีม และปรับเปลี่ยนบทบาทผู้ใช้</p>
+            <div class="media-container">
+                <img src="assets/05_bulk_upload.webp" alt="Team Onboarding Walkthrough" class="walkthrough-media" />
+            </div>
+        </section>
+
+        <!-- Module 06 -->
         <section id="logging">
-            <span class="section-tag">Module 01</span>
-            <h2>Precision Time Logging</h2>
-            <p>Aion provides three distinct methods for capturing work intensity. Whether you need quick entries or mass day logs, the platform ensures total accuracy with minimal friction.</p>
-            
-            <div class="card-grid">
-                <div class="feature-card">
-                    <h3>Quick Log</h3>
-                    <p>The standard dashboard widget for immediate entry. Select your project, phase, and task with smart autocomplete.</p>
-                </div>
-                <div class="feature-card">
-                    <h3>Bulk Logging</h3>
-                    <p>Log hours across multiple days or weeks simultaneously. Perfect for repetitive tasks or catching up on Friday.</p>
-                </div>
-                <div class="feature-card">
-                    <h3>Draft Workflow</h3>
-                    <p>Entries start as Drafts. Use the Time Logs page to review, edit, and bulk-submit your work for the week.</p>
-                </div>
+            <div class="module-header">
+                <span class="module-tag">Module 06</span>
+                <span class="role-badge role-all" lang="en">ALL</span>
+                <span class="role-badge role-all" lang="th">ผู้ใช้ทุกคน</span>
             </div>
-
-            <img src="assets/time_logging.webp" alt="Time Logging Workflow Walkthrough" class="walkthrough-media" />
+            <h2 lang="en">Time Logging & Submissions</h2>
+            <h2 lang="th">การบันทึกชั่วโมงทำงานและส่งรายงาน</h2>
+            <p class="module-desc" lang="en">Log operational hours via Quick Log, review weekly timesheet draft entries, and submit logs for administrative validation.</p>
+            <p class="module-desc" lang="th">การลงบันทึกชั่วโมงปฏิบัติงานรายวัน ตรวจสอบแบบร่างบันทึกเวลารายสัปดาห์ และส่งคำขออนุมัติอย่างเป็นทางการ</p>
+            <div class="media-container">
+                <img src="assets/06_time_logging.webp" alt="Time Logging Walkthrough" class="walkthrough-media" />
+            </div>
         </section>
 
-        <section id="planning">
-            <span class="section-tag">Module 02</span>
-            <h2>Strategic Project Planning</h2>
-            <p>Go beyond simple lists. Aion's planning module supports complex Work Breakdown Structures (WBS) and real-time Gantt visualization.</p>
-            
-            <div class="card-grid">
-                <div class="feature-card">
-                    <h3>Hierarchical WBS</h3>
-                    <p>Nest tasks to infinite depth. Track progress at the sub-task level and see it roll up to the project total.</p>
-                </div>
-                <div class="feature-card">
-                    <h3>Interactive Gantt</h3>
-                    <p>Visualize timelines and dependencies. Drag and drop to adjust schedules (Admin only).</p>
-                </div>
-                <div class="feature-card">
-                    <h3>Plan vs Actual</h3>
-                    <p>The core of Aion. Directly link time entries to planned tasks to see variance in real-time.</p>
-                </div>
+        <!-- Module 07 -->
+        <section id="analytics">
+            <div class="module-header">
+                <span class="module-tag">Module 07</span>
+                <span class="role-badge role-admin" lang="en">ADMIN</span>
+                <span class="role-badge role-admin" lang="th">ผู้ดูแลระบบ</span>
             </div>
-            <img src="assets/enterprise_features.webp" alt="Project Planning and Resource Utilization Walkthrough" class="walkthrough-media" />
+            <h2 lang="en">Resource Analytics & Heatmaps</h2>
+            <h2 lang="th">การวิเคราะห์ประสิทธิภาพและกำลังคน</h2>
+            <p class="module-desc" lang="en">Analyze team capacity heatmaps, track utilization rates, assess planned-vs-actual variance, and project allocation constraints.</p>
+            <p class="module-desc" lang="th">วิเคราะห์ตารางแผนภูมิความร้อนของบุคลากร เปรียบเทียบชั่วโมงงานตามแผนกับที่ลงปฏิบัติงานจริง และประเมินเพื่อลดปัญหาการทำงานหนักเกินไป</p>
+            <div class="media-container">
+                <img src="assets/07_analytics_reports.webp" alt="Analytics Reports Walkthrough" class="walkthrough-media" />
+            </div>
         </section>
 
-        <section id="intelligence">
-            <span class="section-tag">Module 03</span>
-            <h2>Resource Intelligence</h2>
-            <p>Predict bottlenecks before they happen. Our forecasting engine analyzes planned workloads across the entire organization.</p>
-            
-            <div class="card-grid">
-                <div class="feature-card">
-                    <h3>Capacity Heatmaps</h3>
-                    <p>Identify over-allocated team members with color-coded utilization charts.</p>
-                </div>
-                <div class="feature-card">
-                    <h3>Workday Interpolation</h3>
-                    <p>Our engine automatically accounts for weekends and organization-specific holidays when calculating availability.</p>
-                </div>
-                <div class="feature-card">
-                    <h3>Strategic Forecasting</h3>
-                    <p>View organizational load 6 months into the future to inform hiring and project acceptance decisions.</p>
-                </div>
+        <!-- Module 08 -->
+        <section id="branding">
+            <div class="module-header">
+                <span class="module-tag">Module 08</span>
+                <span class="role-badge role-super" lang="en">SUPER ADMIN</span>
+                <span class="role-badge role-super" lang="th">ผู้ดูแลระบบระดับสูง</span>
             </div>
-            <img src="assets/resource_intelligence.webp" alt="Resource Intelligence Walkthrough" class="walkthrough-media" />
-        </section>
-
-        <section id="admin">
-            <span class="section-tag">Module 04</span>
-            <h2>Enterprise Administration</h2>
-            <p>Complete control over your organizational identity, data privacy, and compliance standards.</p>
-            
-            <div class="card-grid">
-                <div class="feature-card">
-                    <h3>Custom Branding</h3>
-                    <p>Upload your organization's logo and set your primary brand color to theme the entire Aion instance.</p>
-                </div>
-                <div class="feature-card">
-                    <h3>Multi-Tenant Isolation</h3>
-                    <p>Bank-grade isolation ensures that your data is never visible to other organizations on the platform.</p>
-                </div>
-                <div class="feature-card">
-                    <h3>Audit Trails</h3>
-                    <p>Every creation, modification, and deletion is recorded in an immutable audit log for total accountability.</p>
-                </div>
+            <h2 lang="en">Superadmin Config & Branding</h2>
+            <h2 lang="th">การกำหนดค่าระบบและการทำแบรนด์องค์กร</h2>
+            <p class="module-desc" lang="en">Apply white-label customization including theme branding colors, upload organization logos, and audit isolation profiles.</p>
+            <p class="module-desc" lang="th">การจัดการธีมส่วนกลางขององค์กร อัปโหลดโลโก้บริษัท ปรับเปลี่ยนสีองค์ประกอบหลักเพื่อควบคุมอัตลักษณ์ และการเข้าถึงระบบแบบแยกผู้เช่า</p>
+            <div class="media-container">
+                <img src="assets/08_superadmin_config.webp" alt="Superadmin Configuration Walkthrough" class="walkthrough-media" />
             </div>
-            <img src="assets/login_branding.webp" alt="Custom Branding & Logo Settings Walkthrough" class="walkthrough-media" />
         </section>
     </main>
 
-    <footer>
-        <p>&copy; 2026 Aion Portfolio Intelligence. All rights reserved.</p>
-        <p style="margin-top: 1rem; font-size: 0.7rem; opacity: 0.5;">Proprietary & Confidential</p>
-    </footer>
-
     <script>
-        // Smooth scroll for nav links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        function setLanguage(lang, button) {
+            document.documentElement.setAttribute('lang', lang);
+            
+            // Update active state of buttons
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            button.classList.add('active');
+        }
+
+        // Active link tracking during scrolling
+        const sections = document.querySelectorAll('section');
+        const navLinks = document.querySelectorAll('.nav-link');
+
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if (window.pageYOffset >= (sectionTop - 150)) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === `#${current}`) {
+                    link.classList.add('active');
+                }
+            });
+        });
+
+        // Smooth scroll
+        navLinks.forEach(anchor => {
             anchor.addEventListener('click', function (e) {
                 e.preventDefault();
-                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                const targetId = this.getAttribute('href');
+                document.querySelector(targetId).scrollIntoView({
                     behavior: 'smooth'
                 });
             });
