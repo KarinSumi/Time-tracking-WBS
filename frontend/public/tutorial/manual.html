@@ -213,6 +213,34 @@
             display: block;
         }
 
+        .steps-container {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.01);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .steps-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #fff;
+        }
+
+        .steps-list {
+            margin-left: 1.25rem;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .steps-list li {
+            margin-bottom: 0.5rem;
+            line-height: 1.5;
+        }
+
         /* Language visibility rules */
         body [lang="th"] { display: none; }
         html[lang="th"] [lang="en"] { display: none; }
@@ -322,6 +350,24 @@
             <div class="media-container">
                 <img src="assets/01_register_account.webp" alt="Account Registration Walkthrough" class="walkthrough-media" />
             </div>
+            <div class="steps-container">
+                <h3 class="steps-title" lang="en">Step-by-Step Instructions</h3>
+                <h3 class="steps-title" lang="th">ขั้นตอนการใช้งาน</h3>
+                <ol class="steps-list" lang="en">
+                    <li>Click the <strong>Register</strong> link at the bottom of the login page.</li>
+                    <li>Enter your <strong>Full Name</strong>, <strong>Email Address</strong>, <strong>Organization Name</strong>, and <strong>Password</strong>.</li>
+                    <li>Read and check the <strong>Terms of Service &amp; Privacy Policy</strong> agreement checkbox.</li>
+                    <li>Click the blue <strong>Create Account</strong> button.</li>
+                    <li>You will be redirected to the login page. Enter your credentials and click <strong>Sign In</strong>.</li>
+                </ol>
+                <ol class="steps-list" lang="th">
+                    <li>คลิกที่ลิงก์ <strong>Register</strong> บริเวณด้านล่างของหน้าเข้าสู่ระบบ</li>
+                    <li>กรอกข้อมูล <strong>ชื่อเต็ม (Full Name)</strong>, <strong>อีเมล (Email)</strong>, <strong>ชื่อองค์กร (Organization Name)</strong> และ <strong>รหัสผ่าน (Password)</strong></li>
+                    <li>อ่านรายละเอียดและกดยอมรับเงื่อนไขในช่อง <strong>Terms of Service &amp; Privacy Policy</strong></li>
+                    <li>คลิกปุ่มสีน้ำเงิน <strong>Create Account</strong> เพื่อสร้างบัญชี</li>
+                    <li>ระบบจะนำคุณกลับมายังหน้าเข้าสู่ระบบ กรอกอีเมลและรหัสผ่านที่สมัครใช้งาน จากนั้นคลิก <strong>Sign In</strong></li>
+                </ol>
+            </div>
         </section>
 
         <!-- Module 02 -->
@@ -337,6 +383,24 @@
             <p class="module-desc" lang="th">แนะนำการทำงานของแดชบอร์ดหลัก เช่น หน้าต่างลงเวลาด่วน ปฏิทินแสดงรอบเวลางาน และการนำทางเมนูทั่วไป</p>
             <div class="media-container">
                 <img src="assets/02_login_dashboard.webp" alt="Dashboard Navigation Walkthrough" class="walkthrough-media" />
+            </div>
+            <div class="steps-container">
+                <h3 class="steps-title" lang="en">Step-by-Step Instructions</h3>
+                <h3 class="steps-title" lang="th">ขั้นตอนการใช้งาน</h3>
+                <ol class="steps-list" lang="en">
+                    <li>Observe the central <strong>Timesheet widgets</strong> showing logged hours for the week.</li>
+                    <li>Check the <strong>Active Tasks</strong> section to see tasks currently assigned to you.</li>
+                    <li>Use the <strong>Quick Log</strong> panel on the dashboard for instant daily time tracking.</li>
+                    <li>Interact with the <strong>Weekly Visual Calendar</strong> to view work distribution patterns.</li>
+                    <li>Use the left sidebar navigation menu to browse different modules (Projects, Plans, Team, Reports, Admin).</li>
+                </ol>
+                <ol class="steps-list" lang="th">
+                    <li>ตรวจสอบหน้าจอแดชบอร์ดหลักที่แสดง <strong>เวลาสะสมรวมประจำสัปดาห์ (Timesheet widgets)</strong></li>
+                    <li>ตรวจสอบส่วน <strong>งานที่ได้รับมอบหมาย (Active Tasks)</strong> เพื่อดูภารกิจปัจจุบันของคุณ</li>
+                    <li>ใช้แผงควบคุม <strong>บันทึกเวลาด่วน (Quick Log)</strong> บนแดชบอร์ดเพื่อลงเวลางานประจำวันอย่างรวดเร็ว</li>
+                    <li>ดูตาราง <strong>ปฏิทินรายสัปดาห์ (Weekly Visual Calendar)</strong> เพื่อดูความหนาแน่นของการทำงานในแต่ละวัน</li>
+                    <li>ใช้เมนูด้านซ้ายในการนำทางไปยังหัวข้อต่าง ๆ เช่น โครงการ (Projects), แผนงาน (Plans), ทีมงาน (Team), รายงาน (Reports) และการตั้งค่าระบบ (Admin)</li>
+                </ol>
             </div>
         </section>
 
@@ -354,6 +418,24 @@
             <div class="media-container">
                 <img src="assets/03_project_setup.webp" alt="Project Setup Walkthrough" class="walkthrough-media" />
             </div>
+            <div class="steps-container">
+                <h3 class="steps-title" lang="en">Step-by-Step Instructions</h3>
+                <h3 class="steps-title" lang="th">ขั้นตอนการใช้งาน</h3>
+                <ol class="steps-list" lang="en">
+                    <li>Navigate to the <strong>Projects</strong> page from the left sidebar.</li>
+                    <li>Click the blue <strong>Add Project</strong> button in the top right corner.</li>
+                    <li>Enter the <strong>Project Name</strong> (e.g. <code>Stitch Dashboard</code>) and choose a color tag, then click <strong>Save</strong>.</li>
+                    <li>Click the <strong>Phases</strong> tab or action button next to your project.</li>
+                    <li>Click <strong>Add Phase</strong>, enter a phase name (e.g. <code>Build</code>), and click <strong>Save</strong> to partition your project.</li>
+                </ol>
+                <ol class="steps-list" lang="th">
+                    <li>ไปที่หน้า <strong>Projects</strong> ผ่านทางเมนูด้านซ้าย</li>
+                    <li>คลิกปุ่ม <strong>Add Project</strong> สีน้ำเงินบริเวณมุมบนขวา</li>
+                    <li>กรอก <strong>ชื่อโครงการ (Project Name)</strong> (เช่น <code>Stitch Dashboard</code>) และเลือกสีประจำโครงการ จากนั้นคลิก <strong>Save</strong></li>
+                    <li>คลิกแท็บ <strong>Phases</strong> หรือปุ่มจัดการระยะเวลาของโครงการ</li>
+                    <li>คลิกปุ่ม <strong>Add Phase</strong> กรอกชื่อระยะการทำงาน (เช่น <code>Build</code>) จากนั้นคลิก <strong>Save</strong></li>
+                </ol>
+            </div>
         </section>
 
         <!-- Module 04 -->
@@ -369,6 +451,26 @@
             <p class="module-desc" lang="th">สร้างผังการแบ่งงานลำดับย่อย กำหนดการเชื่อมต่อและความสัมพันธ์ระหว่างงาน วางแผนปริมาณกำลังคน และดูภาพรวมผ่านแผนภูมิแกนต์</p>
             <div class="media-container">
                 <img src="assets/04_task_planning.webp" alt="Task Planning Walkthrough" class="walkthrough-media" />
+            </div>
+            <div class="steps-container">
+                <h3 class="steps-title" lang="en">Step-by-Step Instructions</h3>
+                <h3 class="steps-title" lang="th">ขั้นตอนการใช้งาน</h3>
+                <ol class="steps-list" lang="en">
+                    <li>Go to the <strong>Plans</strong> page from the left sidebar.</li>
+                    <li>Select the target <strong>Project</strong> and <strong>Phase</strong> from the dropdown filters.</li>
+                    <li>Click the <strong>Add Task</strong> button to append a new item to the Work Breakdown Structure.</li>
+                    <li>Fill in the <strong>Task Description</strong>, <strong>Start Date</strong>, <strong>End Date</strong>, <strong>Planned Hours</strong>, and assign it to a team member.</li>
+                    <li>To create a hierarchy, set the <strong>Parent Task</strong> from the dropdown menu (e.g. nest <code>UI Components</code> under <code>Project Foundation</code>).</li>
+                    <li>Click <strong>Save</strong> to render the task tree and the interactive <strong>Gantt Chart</strong>.</li>
+                </ol>
+                <ol class="steps-list" lang="th">
+                    <li>ไปที่หน้า <strong>Plans</strong> ผ่านทางเมนูด้านซ้าย</li>
+                    <li>เลือก <strong>โครงการ (Project)</strong> และ <strong>ระยะการทำงาน (Phase)</strong> ที่ต้องการวิเคราะห์จากตัวเลือก</li>
+                    <li>คลิกปุ่ม <strong>Add Task</strong> เพื่อสร้างหัวข้องานใหม่ในโครงสร้างแบ่งงาน (WBS)</li>
+                    <li>ระบุ <strong>รายละเอียดงาน (Task Description)</strong>, <strong>วันเริ่มต้น/สิ้นสุด (Start/End Date)</strong>, <strong>ชั่วโมงที่วางแผน (Planned Hours)</strong> และเลือกผู้รับผิดชอบ</li>
+                    <li>หากต้องการจัดกลุ่มแบบลำดับชั้น ให้ระบุ <strong>งานหลัก (Parent Task)</strong> ในตัวเลือก (เช่น นำงาน <code>UI Components</code> ไปเป็นงานย่อยภายใต้ <code>Project Foundation</code>)</li>
+                    <li>คลิกปุ่ม <strong>Save</strong> ผังโครงการจะแสดงผลแบบลำดับขั้นควบคู่กับ <strong>แผนภูมิแกนต์ (Gantt Chart)</strong> ทันที</li>
+                </ol>
             </div>
         </section>
 
@@ -386,6 +488,26 @@
             <div class="media-container">
                 <img src="assets/05_bulk_upload.webp" alt="Team Onboarding Walkthrough" class="walkthrough-media" />
             </div>
+            <div class="steps-container">
+                <h3 class="steps-title" lang="en">Step-by-Step Instructions</h3>
+                <h3 class="steps-title" lang="th">ขั้นตอนการใช้งาน</h3>
+                <ol class="steps-list" lang="en">
+                    <li>Go to the <strong>Team</strong> page from the left sidebar.</li>
+                    <li>Click the <strong>Bulk Register</strong> or upload section to reveal template actions.</li>
+                    <li>Click <strong>Download Template</strong> to obtain the standardized Excel spreadsheet.</li>
+                    <li>Open the file and enter employee details including <strong>Name</strong>, <strong>Email</strong>, <strong>Role</strong> (USER/ADMIN), and <strong>Manager Email</strong>.</li>
+                    <li>Save the spreadsheet, return to the interface, choose/drag the filled file, and click <strong>Upload</strong>.</li>
+                    <li>Confirm the team roster automatically refreshes showing all new members with manager lines.</li>
+                </ol>
+                <ol class="steps-list" lang="th">
+                    <li>ไปที่หน้า <strong>Team</strong> ผ่านทางเมนูด้านซ้าย</li>
+                    <li>คลิกปุ่ม <strong>Bulk Register</strong> หรือไปยังส่วนอัปโหลดเพื่อเข้าสู่ฟังก์ชันนำเข้าไฟล์ข้อมูล</li>
+                    <li>คลิกปุ่ม <strong>Download Template</strong> เพื่อรับไฟล์เทมเพลต Excel สำหรับกรอกข้อมูล</li>
+                    <li>เปิดไฟล์แล้วกรอกข้อมูลพนักงาน ได้แก่ <strong>ชื่อ (Name)</strong>, <strong>อีเมล (Email)</strong>, <strong>บทบาท (Role)</strong> และ <strong>อีเมลหัวหน้า (Manager Email)</strong></li>
+                    <li>บันทึกไฟล์เทมเพลต จากนั้นกลับมาหน้าเว็บเพื่อเลือกไฟล์และคลิกปุ่ม <strong>Upload</strong></li>
+                    <li>ตรวจสอบตารางรายชื่อทีมงานที่จะอัปเดตและแสดงผลความสัมพันธ์การขึ้นตรงต่อหัวหน้างานอย่างถูกต้อง</li>
+                </ol>
+            </div>
         </section>
 
         <!-- Module 06 -->
@@ -401,6 +523,24 @@
             <p class="module-desc" lang="th">การลงบันทึกชั่วโมงปฏิบัติงานรายวัน ตรวจสอบแบบร่างบันทึกเวลารายสัปดาห์ และส่งคำขออนุมัติอย่างเป็นทางการ</p>
             <div class="media-container">
                 <img src="assets/06_time_logging.webp" alt="Time Logging Walkthrough" class="walkthrough-media" />
+            </div>
+            <div class="steps-container">
+                <h3 class="steps-title" lang="en">Step-by-Step Instructions</h3>
+                <h3 class="steps-title" lang="th">ขั้นตอนการใช้งาน</h3>
+                <ol class="steps-list" lang="en">
+                    <li>From the Dashboard, locate the <strong>Quick Log Time</strong> widget.</li>
+                    <li>Select the target <strong>Project</strong>, <strong>Phase</strong>, and <strong>WBS Planned Task</strong>.</li>
+                    <li>Input the <strong>Worked Hours</strong> (e.g. <code>4</code>) and write a descriptive summary of your achievements.</li>
+                    <li>Click <strong>Log Time</strong> to save it. This logs the entry in a <code>DRAFT</code> status.</li>
+                    <li>Navigate to the <strong>Time Logs</strong> page. Select your draft entries using checkboxes and click <strong>Submit</strong> to send them for approval.</li>
+                </ol>
+                <ol class="steps-list" lang="th">
+                    <li>ในหน้าแดชบอร์ดหลัก ค้นหาหน้าต่างบันทึกเวลาด่วน <strong>Quick Log Time</strong></li>
+                    <li>เลือก <strong>โครงการ (Project)</strong>, <strong>ระยะการทำงาน (Phase)</strong> และ <strong>ชิ้นงาน (WBS Planned Task)</strong> ที่ระบุในแผนงาน</li>
+                    <li>กรอกจำนวน <strong>ชั่วโมงปฏิบัติงาน (Worked Hours)</strong> (เช่น <code>4</code> ชั่วโมง) และระบุบันทึกรายละเอียดงานสั้น ๆ</li>
+                    <li>คลิกปุ่ม <strong>Log Time</strong> บันทึกดังกล่าวจะขึ้นแสดงในระบบเป็นสถานะแบบร่าง (<code>DRAFT</code>)</li>
+                    <li>ไปที่หน้า <strong>Time Logs</strong> เลือกรายการแบบร่างที่ต้องการส่งทางด้านหน้า แล้วกดปุ่ม <strong>Submit</strong> เพื่อขออนุมัติอย่างเป็นทางการ</li>
+                </ol>
             </div>
         </section>
 
@@ -418,6 +558,34 @@
             <div class="media-container">
                 <img src="assets/07_analytics_reports.webp" alt="Analytics Reports Walkthrough" class="walkthrough-media" />
             </div>
+            <div class="steps-container">
+                <h3 class="steps-title" lang="en">Step-by-Step Instructions</h3>
+                <h3 class="steps-title" lang="th">ขั้นตอนการใช้งาน</h3>
+                <ol class="steps-list" lang="en">
+                    <li>Go to the <strong>Reports</strong> page and click the <strong>Capacity</strong> tab.</li>
+                    <li>Set the <strong>Start Date</strong> and <strong>End Date</strong> filters using the datepickers to target a specific calendar sprint.</li>
+                    <li>Observe the <strong>Resource Heatmap</strong>:
+                        <ul>
+                            <li>🟩 <strong>Green cells</strong>: Normal allocation and healthy utilization.</li>
+                            <li>🟥 <strong>Red cells</strong>: Over-allocated resource status (&gt;8 hours in a workday).</li>
+                            <li>⬛ <strong>Grey cells</strong>: Weekends and corporate holidays.</li>
+                        </ul>
+                    </li>
+                    <li>Click the <strong>Export Report</strong> button in the top right to download a CSV format capacity breakdown.</li>
+                </ol>
+                <ol class="steps-list" lang="th">
+                    <li>ไปที่หน้า <strong>Reports</strong> และคลิกแท็บ <strong>Capacity</strong></li>
+                    <li>เลือกช่วง <strong>วันเริ่มต้น (Start Date)</strong> และ <strong>วันสิ้นสุด (End Date)</strong> เพื่อกำหนดสัปดาห์หรือช่วงเวลาที่ต้องการดู</li>
+                    <li>สังเกตแถบตารางวิเคราะห์ความร้อน <strong>Resource Heatmap</strong>:
+                        <ul>
+                            <li>🟩 <strong>ช่องสีเขียว</strong>: ปริมาณงานปกติ มีการใช้งานกำลังคนในเกณฑ์ปกติ</li>
+                            <li>🟥 <strong>ช่องสีแดง</strong>: มีภาระงานหนักเกินไป (&gt;8 ชั่วโมงต่อวันทำงาน)</li>
+                            <li>⬛ <strong>ช่องสีเทา</strong>: วันหยุดสุดสัปดาห์หรือวันหยุดของบริษัท</li>
+                        </ul>
+                    </li>
+                    <li>คลิกปุ่ม <strong>Export Report</strong> มุมบนขวาเพื่อส่งออกข้อมูลตารางกำลังคนในรูปแบบ CSV</li>
+                </ol>
+            </div>
         </section>
 
         <!-- Module 08 -->
@@ -433,6 +601,24 @@
             <p class="module-desc" lang="th">การจัดการธีมส่วนกลางขององค์กร อัปโหลดโลโก้บริษัท ปรับเปลี่ยนสีองค์ประกอบหลักเพื่อควบคุมอัตลักษณ์ และการเข้าถึงระบบแบบแยกผู้เช่า</p>
             <div class="media-container">
                 <img src="assets/08_superadmin_config.webp" alt="Superadmin Configuration Walkthrough" class="walkthrough-media" />
+            </div>
+            <div class="steps-container">
+                <h3 class="steps-title" lang="en">Step-by-Step Instructions</h3>
+                <h3 class="steps-title" lang="th">ขั้นตอนการใช้งาน</h3>
+                <ol class="steps-list" lang="en">
+                    <li>Navigate to the <strong>Admin Settings</strong> (or Admin) page from the sidebar.</li>
+                    <li>Find the <strong>Branding Customization</strong> panel.</li>
+                    <li>Input a custom primary theme color (e.g. hex code <code>#ff5722</code> for orange, or pick from the palette).</li>
+                    <li>Use the upload widget to choose and send your corporate <strong>Logo image</strong>.</li>
+                    <li>Click <strong>Save Customization</strong>. Notice the sidebar logo and theme accent colors update in real-time.</li>
+                </ol>
+                <ol class="steps-list" lang="th">
+                    <li>ไปที่หน้า <strong>Admin Settings</strong> (หรือ Admin) ผ่านทางเมนูด้านซ้าย</li>
+                    <li>ค้นหาหัวข้อควบคุมการตกแต่งแบรนด์ <strong>Branding Customization</strong></li>
+                    <li>กรอกรหัสสีหลักขององค์กรที่คุณต้องการปรับ (เช่น รหัสสีส้ม <code>#ff5722</code> หรือเลือกจากแถบสี)</li>
+                    <li>ใช้เมนูอัปโหลดไฟล์ในการเปลี่ยนภาพ <strong>โลโก้ของบริษัท (Logo image)</strong></li>
+                    <li>คลิกปุ่ม <strong>Save Customization</strong> สีสันของปุ่มควบคุมและโลโก้หลักในเมนูด้านซ้ายจะเปลี่ยนตามอัตลักษณ์องค์กรทันที</li>
+                </ol>
             </div>
         </section>
     </main>
