@@ -50,6 +50,7 @@ const TimeEntryForm: React.FC<TimeEntryFormProps> = ({ onEntrySaved, selectedDat
       setDescription(editingEntry.taskDescription);
       setProjectId(editingEntry.project?.id || '');
       setPhaseId(editingEntry.phase?.id || '');
+      setPlannedTaskId(editingEntry.plannedTaskId || '');
       setTimeMode('direct');
       setDirectHours(editingEntry.hours.toString());
       onDateChange(new Date(editingEntry.date).toLocaleDateString('en-CA'));
@@ -57,6 +58,7 @@ const TimeEntryForm: React.FC<TimeEntryFormProps> = ({ onEntrySaved, selectedDat
       setDescription('');
       setProjectId('');
       setPhaseId('');
+      setPlannedTaskId('');
       setDirectHours('');
     }
   }, [editingEntry, onDateChange]);

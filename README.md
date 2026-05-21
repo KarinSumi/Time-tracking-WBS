@@ -1,6 +1,6 @@
 # Aion Enterprise Time Logger
 
-🌐 **Select Language**: English | [ภาษาไทย (Thai)](README.th.md)
+🌐 **Select Language**: English | [ภาษาไทย (Thai)](README.th.md) | [日本語 (Japanese)](README.ja.md)
 
 Welcome to the **Aion Enterprise Time Logger** — a comprehensive enterprise portfolio management platform designed for precision time logging, strategic project planning, resource intelligence, and enterprise administration.
 

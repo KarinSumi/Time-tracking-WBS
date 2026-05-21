@@ -1,5 +1,6 @@
 import React from 'react';
 import { Pencil, Trash2, Clock, CheckCircle2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 
@@ -17,6 +18,7 @@ interface DashboardProps { entries: TimeEntry[]; onRefresh?: () => void; onEdit?
 import { deleteEntry, updateEntry } from '../api';
 
 const Dashboard: React.FC<DashboardProps> = ({ entries, onRefresh, onEdit }) => {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const { addToast } = useToast();
 
@@ -63,7 +65,7 @@ const Dashboard: React.FC<DashboardProps> = ({ entries, onRefresh, onEdit }) => 
     <div className="h-full flex flex-col">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold text-[var(--text-primary)]">Team Activity</h2>
-        <button className="text-xs font-bold text-blue-500 hover:underline">View All</button>
+        <button onClick={() => navigate('/logs')} className="text-xs font-bold text-blue-500 hover:underline">View All</button>
       </div>
       <div className="flex-1 overflow-y-auto pr-1 -mr-1">
         <div className="space-y-1.5">

@@ -12,6 +12,7 @@ import reportsRouter from './routes/reports';
 import holidaysRouter from './routes/holidays';
 import teamRouter from './routes/team';
 import organizationRouter from './routes/organizations';
+import smartInsightsRouter from './routes/smartInsights';
 import { errorHandler } from './middleware/errorHandler';
 
 const app = express();
@@ -37,6 +38,7 @@ app.use('/api/reports', reportsRouter);
 app.use('/api/holidays', holidaysRouter);
 app.use('/api/team', teamRouter);
 app.use('/api/organizations', organizationRouter);
+app.use('/api/suggestions', smartInsightsRouter);
 
 app.use(errorHandler);
 

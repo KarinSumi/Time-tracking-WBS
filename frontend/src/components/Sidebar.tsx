@@ -157,16 +157,6 @@ const Sidebar: React.FC = () => {
           })()}
         </ul>
       </nav>
-      {/* Upgrade Box */}
-      {!collapsed && (
-        <div className="mx-3 mt-auto p-4 rounded-2xl bg-black text-white mb-4">
-          <p className="text-[11px] font-bold uppercase tracking-wider mb-1">Upgrade Plan</p>
-          <p className="text-[9px] text-white/50 mb-3 leading-relaxed">Access advanced predictive analytics and priority support.</p>
-          <button className="w-full py-2 bg-white text-black text-[10px] font-bold rounded-lg hover:bg-white/90 transition-colors">
-            Go Pro
-          </button>
-        </div>
-      )}
 
       {/* User section at bottom */}
       <div className="px-3 pb-5 border-t border-[var(--border-subtle)] pt-4">

@@ -41,6 +41,18 @@ const HomePage: React.FC = () => {
     }
   }, [token, user?.role]);
 
+  const handleSelectSuggestion = (task: Partial<TimeEntry>) => {
+    setEditingEntry({
+      taskDescription: task.taskDescription || '',
+      hours: task.hours || 0,
+      userId: task.userId || '',
+      date: task.date || new Date().toLocaleDateString('en-CA'),
+      project: task.project || null,
+      phase: task.phase || null,
+      plannedTaskId: task.plannedTaskId || null
+    });
+  };
+
   useEffect(() => { 
     fetchEntries(); 
     fetchAuditLogs();
@@ -95,7 +107,7 @@ const HomePage: React.FC = () => {
         {/* Right Column: Insights & Calendar */}
         <div className="col-span-12 lg:col-span-4 flex flex-col gap-5 animate-slideUp opacity-0 delay-4" style={{ animationFillMode: 'forwards' }}>
           <div className="flex-1 glass-card p-7 min-h-[230px]">
-            <SmartInsights />
+            <SmartInsights onSelectTask={handleSelectSuggestion} />
           </div>
           <div className="glass-card p-7">
             <CalendarWidget entries={entries} selectedDate={selectedDate} onSelectDate={setSelectedDate} />

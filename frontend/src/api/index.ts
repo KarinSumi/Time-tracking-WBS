@@ -10,4 +10,5 @@ export * from './holidays';
 export * from './organizations';
 export * from './phases';
 export * from './wbs';
-export * from './team';
+export * from './suggestions';
+
