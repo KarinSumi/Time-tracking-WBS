@@ -1,17 +1,45 @@
 import bcrypt from 'bcryptjs';
 import prisma from '../lib/prisma';
 import { generateToken } from '../middleware/auth';
+import { loginRateLimiter } from '../utils/rateLimiter';
 
 export async function login(email: string, password: string) {
+  const lockStatus = loginRateLimiter.isLocked(email);
+  if (lockStatus.locked) {
+    const mins = Math.ceil(lockStatus.remainingMs / 60000);
+    throw new Error(`Account is temporarily locked. Please try again in ${mins} minutes.`);
+  }
+
   const user = await prisma.user.findUnique({
     where: { email },
     include: { organization: true },
   });
 
-  if (!user) throw new Error('Invalid email or password');
+  if (!user) {
+    loginRateLimiter.recordFailure(email);
+    throw new Error('Invalid email or password');
+  }
 
   const validPassword = await bcrypt.compare(password, user.passwordHash);
-  if (!validPassword) throw new Error('Invalid email or password');
+  if (!validPassword) {
+    loginRateLimiter.recordFailure(email);
+    const updatedStatus = loginRateLimiter.isLocked(email);
+    if (updatedStatus.locked) {
+      await prisma.auditLog.create({
+        data: {
+          entityType: 'SECURITY',
+          entityId: user.id,
+          action: 'BRUTE_FORCE_LOCKOUT',
+          performedBy: user.id,
+          newValues: { email, reason: '5 consecutive failed login attempts' }
+        }
+      });
+    }
+    throw new Error('Invalid email or password');
+  }
+
+  // Reset failures on successful login
+  loginRateLimiter.reset(email);
 
   const token = generateToken(user.id, user.role, user.orgId);
 
@@ -31,9 +59,16 @@ export async function login(email: string, password: string) {
   };
 }
 
+import { validatePassword } from '../utils/security';
+
 export async function register(name: string, email: string, password: string, orgName?: string) {
   const existing = await prisma.user.findUnique({ where: { email } });
   if (existing) throw new Error('An account with this email already exists');
+
+  const passwordCheck = validatePassword(password);
+  if (!passwordCheck.valid) {
+    throw new Error(passwordCheck.reason || 'Password does not meet complexity requirements');
+  }
 
   const passwordHash = await bcrypt.hash(password, 10);
 

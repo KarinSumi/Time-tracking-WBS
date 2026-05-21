@@ -20,8 +20,14 @@ router.post('/login', async (req, res) => {
     const result = await login(email, password);
     res.json(result);
   } catch (error: any) {
-    const status = error.message === 'Invalid email or password' ? 401 : 500;
-    res.status(status).json({ error: error.message || 'Internal server error' });
+    let status = 500;
+    const msg = error.message || 'Internal server error';
+    if (msg === 'Invalid email or password') {
+      status = 401;
+    } else if (msg.startsWith('Account is temporarily locked')) {
+      status = 423;
+    }
+    res.status(status).json({ error: msg });
   }
 });
 
@@ -37,7 +43,7 @@ router.post('/register', async (req, res) => {
     const result = await register(name, email, password, orgName);
     res.status(201).json(result);
   } catch (error: any) {
-    const status = error.message.includes('already exists') ? 409 : 500;
+    const status = error.message.includes('complexity') || error.message.includes('Password') ? 400 : (error.message.includes('already exists') ? 409 : 500);
     res.status(status).json({ error: error.message || 'Internal server error' });
   }
 });

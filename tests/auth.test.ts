@@ -18,7 +18,7 @@ describe('Auth API', () => {
       .send({
         name: 'John Doe',
         email: 'john@example.com',
-        password: 'password123',
+        password: 'Password123!',
         orgName: 'Acme Corp'
       });
 
@@ -28,11 +28,24 @@ describe('Auth API', () => {
     expect(res.body.user).toHaveProperty('orgName', 'Acme Corp');
   });
 
+  it('should reject registration with weak password', async () => {
+    const res = await request(app)
+      .post('/api/auth/register')
+      .send({
+        name: 'Weak User',
+        email: 'weak@example.com',
+        password: 'weak',
+        orgName: 'Stitch'
+      });
+    expect(res.status).toBe(400);
+    expect(res.body.error).toContain('at least 8 characters');
+  });
+
   it('should login an existing user', async () => {
     const regRes = await request(app).post('/api/auth/register').send({
       name: 'Jane Doe',
       email: 'jane@example.com',
-      password: 'password123'
+      password: 'Password123!'
     });
     
     expect(regRes.status).toBe(201);
@@ -41,12 +54,37 @@ describe('Auth API', () => {
       .post('/api/auth/login')
       .send({
         email: 'jane@example.com',
-        password: 'password123'
+        password: 'Password123!'
       });
 
     expect(res.status).toBe(200);
     expect(res.body).toHaveProperty('token');
     expect(res.body.user).toHaveProperty('email', 'jane@example.com');
+  });
+
+  it('should temporarily lock account after 5 failed logins', async () => {
+    // Register the user first
+    const regRes = await request(app).post('/api/auth/register').send({
+      name: 'Lockout User',
+      email: 'lockout@example.com',
+      password: 'Password123!'
+    });
+    expect(regRes.status).toBe(201);
+
+    // Attempt 5 incorrect logins
+    for (let i = 0; i < 5; i++) {
+      const res = await request(app)
+        .post('/api/auth/login')
+        .send({ email: 'lockout@example.com', password: 'wrongpassword' });
+      expect(res.status).toBe(401);
+    }
+
+    // 6th attempt should return 423 Locked
+    const res = await request(app)
+      .post('/api/auth/login')
+      .send({ email: 'lockout@example.com', password: 'Password123!' });
+    expect(res.status).toBe(423);
+    expect(res.body.error).toContain('locked');
   });
 
   it('should get current user profile with valid token', async () => {

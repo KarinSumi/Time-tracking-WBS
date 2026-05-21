@@ -27,8 +27,24 @@ const RegisterPage: React.FC = () => {
       addToast({ type: 'warning', title: 'Invalid email', message: 'Please enter a valid email address' });
       return;
     }
-    if (password.length < 6) {
-      addToast({ type: 'warning', title: 'Weak password', message: 'Password must be at least 6 characters' });
+    if (password.length < 8) {
+      addToast({ type: 'warning', title: 'Weak password', message: 'Password must be at least 8 characters' });
+      return;
+    }
+    if (!/[A-Z]/.test(password)) {
+      addToast({ type: 'warning', title: 'Weak password', message: 'Password must contain at least one uppercase letter' });
+      return;
+    }
+    if (!/[a-z]/.test(password)) {
+      addToast({ type: 'warning', title: 'Weak password', message: 'Password must contain at least one lowercase letter' });
+      return;
+    }
+    if (!/[0-9]/.test(password)) {
+      addToast({ type: 'warning', title: 'Weak password', message: 'Password must contain at least one number' });
+      return;
+    }
+    if (!/[!@#$%^&*(),.?":{}|<>_]/.test(password)) {
+      addToast({ type: 'warning', title: 'Weak password', message: 'Password must contain at least one special character' });
       return;
     }
     if (password !== confirmPassword) {
@@ -51,13 +67,13 @@ const RegisterPage: React.FC = () => {
 
   const getPasswordStrength = () => {
     if (!password) return { label: '', color: '', width: '0%' };
-    if (password.length < 6) return { label: 'Too short', color: '#ef4444', width: '20%' };
+    if (password.length < 8) return { label: 'Too short', color: '#ef4444', width: '20%' };
     const hasUpper = /[A-Z]/.test(password);
     const hasLower = /[a-z]/.test(password);
     const hasNumber = /[0-9]/.test(password);
-    const hasSpecial = /[^A-Za-z0-9]/.test(password);
-    const score = [hasUpper, hasLower, hasNumber, hasSpecial, password.length >= 10].filter(Boolean).length;
-    if (score <= 2) return { label: 'Weak', color: '#f59e0b', width: '40%' };
+    const hasSpecial = /[!@#$%^&*(),.?":{}|<>_]/.test(password);
+    const score = [hasUpper, hasLower, hasNumber, hasSpecial, password.length >= 12].filter(Boolean).length;
+    if (score <= 2) return { label: 'Weak', color: '#ef4444', width: '40%' };
     if (score <= 3) return { label: 'Fair', color: '#f59e0b', width: '60%' };
     if (score <= 4) return { label: 'Strong', color: '#22c55e', width: '80%' };
     return { label: 'Very strong', color: '#22c55e', width: '100%' };
@@ -121,7 +137,7 @@ const RegisterPage: React.FC = () => {
               <div className="relative">
                 <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-white/30" />
                 <input id="register-password" type={showPassword ? 'text' : 'password'} disabled={isLoading}
-                  className="glass-input w-full pl-11 pr-11 py-3 rounded-xl text-sm" placeholder="Min. 6 characters"
+                  className="glass-input w-full pl-11 pr-11 py-3 rounded-xl text-sm" placeholder="Min. 8 chars, 1 upper/lower/num/symbol"
                   value={password} onChange={(e) => setPassword(e.target.value)} />
                 <button type="button" onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition-colors" tabIndex={-1}>
