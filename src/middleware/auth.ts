@@ -1,7 +1,13 @@
 import jwt from 'jsonwebtoken';
 import { Request, Response, NextFunction } from 'express';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'aion-dev-secret-key-change-in-production';
+const fallbackSecret = 'aion-dev-secret-key-change-in-production';
+if (process.env.NODE_ENV === 'production') {
+  if (!process.env.JWT_SECRET || process.env.JWT_SECRET === fallbackSecret) {
+    throw new Error('PRODUCTION SECURITY ERROR: JWT_SECRET environment variable is missing or set to insecure dev default.');
+  }
+}
+const JWT_SECRET = process.env.JWT_SECRET || fallbackSecret;
 
 export interface AuthRequest extends Request {
   userId?: string;

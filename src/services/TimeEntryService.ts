@@ -39,6 +39,46 @@ export async function listEntries(filters: any, context: UserContext) {
 }
 
 export async function createEntry(data: any, userId: string) {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { orgId: true }
+  });
+  if (!user) throw new Error('User not found');
+  const orgId = user.orgId;
+
+  if (data.projectId) {
+    const project = await prisma.project.findUnique({
+      where: { id: data.projectId }
+    });
+    if (!project || project.orgId !== orgId) {
+      throw new Error('Unauthorized');
+    }
+  }
+
+  if (data.phaseId) {
+    const phase = await prisma.phase.findUnique({
+      where: { id: data.phaseId }
+    });
+    if (!phase || phase.orgId !== orgId) {
+      throw new Error('Unauthorized');
+    }
+  }
+
+  if (data.plannedTaskId) {
+    const plannedTask = await prisma.plannedTask.findUnique({
+      where: { id: data.plannedTaskId }
+    });
+    if (!plannedTask) {
+      throw new Error('Unauthorized');
+    }
+    const assignee = await prisma.user.findUnique({
+      where: { id: plannedTask.assigneeId }
+    });
+    if (!assignee || assignee.orgId !== orgId) {
+      throw new Error('Unauthorized');
+    }
+  }
+
   const entry = await prisma.timeEntry.create({
     data: {
       ...data,
@@ -79,6 +119,22 @@ export async function updateTimeEntry(id: string, data: any, context: UserContex
 
     if (!isOwner && !isOrgAdmin) throw new Error('Unauthorized');
     if (oldEntry.status !== 'DRAFT' && !isOrgAdmin) throw new Error('Cannot edit non-draft entry');
+
+    // Tenant check for updated parameters
+    if (data.projectId) {
+      const project = await tx.project.findUnique({ where: { id: data.projectId } });
+      if (!project || project.orgId !== context.orgId) throw new Error('Unauthorized');
+    }
+    if (data.phaseId) {
+      const phase = await tx.phase.findUnique({ where: { id: data.phaseId } });
+      if (!phase || phase.orgId !== context.orgId) throw new Error('Unauthorized');
+    }
+    if (data.plannedTaskId) {
+      const plannedTask = await tx.plannedTask.findUnique({ where: { id: data.plannedTaskId } });
+      if (!plannedTask) throw new Error('Unauthorized');
+      const assignee = await tx.user.findUnique({ where: { id: plannedTask.assigneeId } });
+      if (!assignee || assignee.orgId !== context.orgId) throw new Error('Unauthorized');
+    }
 
     const newEntry = await tx.timeEntry.update({
       where: { id },
@@ -145,6 +201,22 @@ export async function createMultiDayEntries(data: any, userId: string) {
   const user = await prisma.user.findUnique({ where: { id: userId }, select: { orgId: true } });
   if (!user) throw new Error('User not found');
 
+  // Verify that referenced items belong to the user's org
+  if (projectId) {
+    const project = await prisma.project.findUnique({ where: { id: projectId } });
+    if (!project || project.orgId !== user.orgId) throw new Error('Unauthorized');
+  }
+  if (phaseId) {
+    const phase = await prisma.phase.findUnique({ where: { id: phaseId } });
+    if (!phase || phase.orgId !== user.orgId) throw new Error('Unauthorized');
+  }
+  if (plannedTaskId) {
+    const plannedTask = await prisma.plannedTask.findUnique({ where: { id: plannedTaskId } });
+    if (!plannedTask) throw new Error('Unauthorized');
+    const assignee = await prisma.user.findUnique({ where: { id: plannedTask.assigneeId } });
+    if (!assignee || assignee.orgId !== user.orgId) throw new Error('Unauthorized');
+  }
+
   const holidays = await prisma.holiday.findMany({ 
     where: { orgId: user.orgId },
     select: { date: true }
@@ -194,12 +266,31 @@ export async function createMultiDayEntries(data: any, userId: string) {
 }
 
 export async function createBulkEntries(entries: any[], userId: string) {
+  const user = await prisma.user.findUnique({ where: { id: userId }, select: { orgId: true } });
+  if (!user) throw new Error('User not found');
+  const orgId = user.orgId;
+
   return await prisma.$transaction(async (tx) => {
     const createdEntries = [];
     for (const data of entries) {
       const { hours, taskDescription, date, projectId, phaseId, plannedTaskId } = data;
       
       if (!taskDescription || !hours) throw new Error('Task description and hours are required for all entries');
+
+      if (projectId) {
+        const project = await tx.project.findUnique({ where: { id: projectId } });
+        if (!project || project.orgId !== orgId) throw new Error('Unauthorized');
+      }
+      if (phaseId) {
+        const phase = await tx.phase.findUnique({ where: { id: phaseId } });
+        if (!phase || phase.orgId !== orgId) throw new Error('Unauthorized');
+      }
+      if (plannedTaskId) {
+        const plannedTask = await tx.plannedTask.findUnique({ where: { id: plannedTaskId } });
+        if (!plannedTask) throw new Error('Unauthorized');
+        const assignee = await tx.user.findUnique({ where: { id: plannedTask.assigneeId } });
+        if (!assignee || assignee.orgId !== orgId) throw new Error('Unauthorized');
+      }
 
       const entry = await tx.timeEntry.create({
         data: {

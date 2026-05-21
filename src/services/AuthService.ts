@@ -70,19 +70,15 @@ export async function register(name: string, email: string, password: string, or
     throw new Error(passwordCheck.reason || 'Password does not meet complexity requirements');
   }
 
+  if (!orgName || orgName.trim() === '') {
+    throw new Error('Organization name is required');
+  }
+
   const passwordHash = await bcrypt.hash(password, 10);
 
-  let org;
-  if (orgName) {
-    org = await prisma.organization.findFirst({ where: { name: orgName } });
-    if (!org) {
-      org = await prisma.organization.create({ data: { name: orgName, brandColor: '#3b82f6' } });
-    }
-  } else {
-    org = await prisma.organization.findFirst();
-    if (!org) {
-      org = await prisma.organization.create({ data: { name: 'Default Organization', brandColor: '#3b82f6' } });
-    }
+  let org = await prisma.organization.findFirst({ where: { name: orgName } });
+  if (!org) {
+    org = await prisma.organization.create({ data: { name: orgName, brandColor: '#3b82f6' } });
   }
 
   const user = await prisma.user.create({
