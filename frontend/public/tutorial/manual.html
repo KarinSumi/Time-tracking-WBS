@@ -242,10 +242,11 @@
         }
 
         /* Language visibility rules */
-        body [lang="th"] { display: none; }
-        html[lang="th"] [lang="en"] { display: none; }
-        html[lang="th"] [lang="th"] { display: block; }
-        html[lang="th"] span[lang="th"] { display: inline-block; }
+        body [lang="th"], body [lang="ja"] { display: none; }
+        html[lang="th"] [lang="en"], html[lang="th"] [lang="ja"] { display: none; }
+        html[lang="ja"] [lang="en"], html[lang="ja"] [lang="th"] { display: none; }
+        html[lang="th"] [lang="th"], html[lang="ja"] [lang="ja"] { display: block; }
+        html[lang="th"] span[lang="th"], html[lang="ja"] span[lang="ja"] { display: inline-block; }
 
         @media (max-width: 1024px) {
             body { flex-direction: column; }
@@ -276,6 +277,7 @@
             <h1>AION</h1>
             <p lang="en">User Manual</p>
             <p lang="th">คู่มือการใช้งาน</p>
+            <p lang="ja">ユーザーマニュアル</p>
         </div>
 
         <ul class="nav-menu">
@@ -283,48 +285,56 @@
                 <a href="#register" class="nav-link active">
                     <span lang="en">01. Registration</span>
                     <span lang="th">01. การลงทะเบียน</span>
+                    <span lang="ja">01. 登録</span>
                 </a>
             </li>
             <li class="nav-item">
                 <a href="#dashboard" class="nav-link">
                     <span lang="en">02. Dashboard Navigation</span>
                     <span lang="th">02. ภาพรวมแดชบอร์ด</span>
+                    <span lang="ja">02. ダッシュボードナビゲーション</span>
                 </a>
             </li>
             <li class="nav-item">
                 <a href="#projects" class="nav-link">
                     <span lang="en">03. Project Setup</span>
                     <span lang="th">03. การตั้งค่าโครงการ</span>
+                    <span lang="ja">03. プロジェクト設定</span>
                 </a>
             </li>
             <li class="nav-item">
                 <a href="#wbs" class="nav-link">
                     <span lang="en">04. Task Planning (WBS)</span>
                     <span lang="th">04. โครงสร้างแบ่งงาน (WBS)</span>
+                    <span lang="ja">04. タスク計画 (WBS)</span>
                 </a>
             </li>
             <li class="nav-item">
                 <a href="#onboarding" class="nav-link">
                     <span lang="en">05. Team Onboarding</span>
                     <span lang="th">05. การจัดการทีม</span>
+                    <span lang="ja">05. チームとメンバーの登録</span>
                 </a>
             </li>
             <li class="nav-item">
                 <a href="#logging" class="nav-link">
                     <span lang="en">06. Time Logging</span>
                     <span lang="th">06. การบันทึกเวลา</span>
+                    <span lang="ja">06. 時間記録と提出</span>
                 </a>
             </li>
             <li class="nav-item">
                 <a href="#analytics" class="nav-link">
                     <span lang="en">07. Capacity Analytics</span>
                     <span lang="th">07. การวิเคราะห์ทรัพยากร</span>
+                    <span lang="ja">07. リソース分析</span>
                 </a>
             </li>
             <li class="nav-item">
                 <a href="#branding" class="nav-link">
                     <span lang="en">08. Superadmin Config</span>
                     <span lang="th">08. การตั้งค่าแบรนด์</span>
+                    <span lang="ja">08. スーパー管理者の設定</span>
                 </a>
             </li>
         </ul>
@@ -332,6 +342,7 @@
         <div class="lang-toggle-container">
             <button class="lang-btn active" onclick="setLanguage('en', this)">EN</button>
             <button class="lang-btn" onclick="setLanguage('th', this)">TH</button>
+            <button class="lang-btn" onclick="setLanguage('ja', this)">JA</button>
         </div>
     </aside>
 
@@ -342,17 +353,21 @@
                 <span class="module-tag">Module 01</span>
                 <span class="role-badge role-all" lang="en">ALL</span>
                 <span class="role-badge role-all" lang="th">ผู้ใช้ทุกคน</span>
+                <span class="role-badge role-all" lang="ja">すべてのユーザー</span>
             </div>
             <h2 lang="en">Account Registration</h2>
             <h2 lang="th">การลงทะเบียนบัญชีผู้ใช้</h2>
+            <h2 lang="ja">アカウント登録</h2>
             <p class="module-desc" lang="en">Create a new user profile, register your company instance, and onboard safely to the workspace environment.</p>
             <p class="module-desc" lang="th">ขั้นตอนการสร้างบัญชีผู้ใช้ใหม่ ลงทะเบียนเปิดสิทธิ์การใช้งานองค์กร และการเข้าสู่ระบบรักษาความปลอดภัยเบื้องต้น</p>
+            <p class="module-desc" lang="ja">新しいユーザープロフィールを作成し、会社のインスタンスを登録して、ワークスペース環境に安全に参加します。</p>
             <div class="media-container">
                 <img src="assets/01_register_account.webp" alt="Account Registration Walkthrough" class="walkthrough-media" />
             </div>
             <div class="steps-container">
                 <h3 class="steps-title" lang="en">Step-by-Step Instructions</h3>
                 <h3 class="steps-title" lang="th">ขั้นตอนการใช้งาน</h3>
+                <h3 class="steps-title" lang="ja">手順</h3>
                 <ol class="steps-list" lang="en">
                     <li>Click the <strong>Register</strong> link at the bottom of the login page.</li>
                     <li>Enter your <strong>Full Name</strong>, <strong>Email Address</strong>, <strong>Organization Name</strong>, and <strong>Password</strong>.</li>
@@ -367,6 +382,13 @@
                     <li>คลิกปุ่มสีน้ำเงิน <strong>Create Account</strong> เพื่อสร้างบัญชี</li>
                     <li>ระบบจะนำคุณกลับมายังหน้าเข้าสู่ระบบ กรอกอีเมลและรหัสผ่านที่สมัครใช้งาน จากนั้นคลิก <strong>Sign In</strong></li>
                 </ol>
+            <ol class="steps-list" lang="ja">
+                    <li>ログインページの下部にある <strong>Register</strong> リンクをクリックします。</li>
+                    <li><strong>フルネーム</strong>、<strong>メールアドレス</strong>、<strong>組織名</strong>、および <strong>パスワード</strong> を入力します。</li>
+                    <li><strong>利用規約とプライバシーポリシー</strong> を読み、チェックボックスをオンにします。</li>
+                    <li>青い <strong>Create Account</strong> ボタンをクリックします。</li>
+                    <li>ログインページにリダイレクトされます。登録したメールアドレスとパスワードを入力して <strong>Sign In</strong> をクリックします。</li>
+                </ol>
             </div>
         </section>
 
@@ -376,17 +398,21 @@
                 <span class="module-tag">Module 02</span>
                 <span class="role-badge role-all" lang="en">ALL</span>
                 <span class="role-badge role-all" lang="th">ผู้ใช้ทุกคน</span>
+                <span class="role-badge role-all" lang="ja">すべてのユーザー</span>
             </div>
             <h2 lang="en">Dashboard Navigation</h2>
             <h2 lang="th">ภาพรวมหน้าจอแดชบอร์ด</h2>
+            <h2 lang="ja">ダッシュボードナビゲーション</h2>
             <p class="module-desc" lang="en">Familiarize yourself with timesheet widgets, active tasks indicators, visual work calendar, and general menu operations.</p>
             <p class="module-desc" lang="th">แนะนำการทำงานของแดชบอร์ดหลัก เช่น หน้าต่างลงเวลาด่วน ปฏิทินแสดงรอบเวลางาน และการนำทางเมนูทั่วไป</p>
+            <p class="module-desc" lang="ja">タイムシートウィジェット、アクティブタスクインジケーター、ビジュアルワークカレンダー、一般的なメニュー操作に慣れてください。</p>
             <div class="media-container">
                 <img src="assets/02_login_dashboard.webp" alt="Dashboard Navigation Walkthrough" class="walkthrough-media" />
             </div>
             <div class="steps-container">
                 <h3 class="steps-title" lang="en">Step-by-Step Instructions</h3>
                 <h3 class="steps-title" lang="th">ขั้นตอนการใช้งาน</h3>
+                <h3 class="steps-title" lang="ja">手順</h3>
                 <ol class="steps-list" lang="en">
                     <li>Observe the central <strong>Timesheet widgets</strong> showing logged hours for the week.</li>
                     <li>Check the <strong>Active Tasks</strong> section to see tasks currently assigned to you.</li>
@@ -401,6 +427,13 @@
                     <li>ดูตาราง <strong>ปฏิทินรายสัปดาห์ (Weekly Visual Calendar)</strong> เพื่อดูความหนาแน่นของการทำงานในแต่ละวัน</li>
                     <li>ใช้เมนูด้านซ้ายในการนำทางไปยังหัวข้อต่าง ๆ เช่น โครงการ (Projects), แผนงาน (Plans), ทีมงาน (Team), รายงาน (Reports) และการตั้งค่าระบบ (Admin)</li>
                 </ol>
+            <ol class="steps-list" lang="ja">
+                    <li>今週の記録時間を表示する中央の <strong>Timesheet (タイムシート)</strong> を確認します。</li>
+                    <li><strong>Active Tasks (アクティブなタスク)</strong> セクションで、現在自分に割り当てられているタスクを確認します。</li>
+                    <li>日々の時間記録には、ダッシュボードの <strong>Quick Log (クイックログ)</strong> パネルを使用します。</li>
+                    <li><strong>Weekly Visual Calendar (週間カレンダー)</strong> を操作して、作業の分布状況を確認します。</li>
+                    <li>左側のサイドバーメニューを使用して、各モジュール（Projects, Plans, Team, Reports, Admin）に移動します。</li>
+                </ol>
             </div>
         </section>
 
@@ -410,17 +443,21 @@
                 <span class="module-tag">Module 03</span>
                 <span class="role-badge role-admin" lang="en">ADMIN</span>
                 <span class="role-badge role-admin" lang="th">ผู้ดูแลระบบ</span>
+                <span class="role-badge role-admin" lang="ja">管理者</span>
             </div>
             <h2 lang="en">Project & Workspace Setup</h2>
             <h2 lang="th">การสร้างและตั้งค่าโครงการ</h2>
+            <h2 lang="ja">プロジェクトとワークスペースの設定</h2>
             <p class="module-desc" lang="en">Initiate client projects, partition projects into strategic stages, set up resource pools, and allocate development tasks.</p>
             <p class="module-desc" lang="th">ขั้นตอนการจัดทำโครงการลูกค้า กำหนดระยะเวลาการดำเนินงานแต่ละระยะ จัดสรรกำลังคน และมอบหมายชิ้นงานหลัก</p>
+            <p class="module-desc" lang="ja">クライアントプロジェクトを開始し、プロジェクトを戦略的なフェーズに分割し、開発タスクを割り当てます。</p>
             <div class="media-container">
                 <img src="assets/03_project_setup.webp" alt="Project Setup Walkthrough" class="walkthrough-media" />
             </div>
             <div class="steps-container">
                 <h3 class="steps-title" lang="en">Step-by-Step Instructions</h3>
                 <h3 class="steps-title" lang="th">ขั้นตอนการใช้งาน</h3>
+                <h3 class="steps-title" lang="ja">手順</h3>
                 <ol class="steps-list" lang="en">
                     <li>Navigate to the <strong>Projects</strong> page from the left sidebar.</li>
                     <li>Click the blue <strong>Add Project</strong> button in the top right corner.</li>
@@ -435,6 +472,13 @@
                     <li>คลิกแท็บ <strong>Phases</strong> หรือปุ่มจัดการระยะเวลาของโครงการ</li>
                     <li>คลิกปุ่ม <strong>Add Phase</strong> กรอกชื่อระยะการทำงาน (เช่น <code>Build</code>) จากนั้นคลิก <strong>Save</strong></li>
                 </ol>
+            <ol class="steps-list" lang="ja">
+                    <li>左側のサイドバーから <strong>Projects</strong> ページに移動します。</li>
+                    <li>右上の青い <strong>Add Project</strong> ボタンをクリックします。</li>
+                    <li><strong>プロジェクト名</strong>（例：<code>Stitch Dashboard</code>）を入力し、カラータグを選択して <strong>Save</strong> をクリックします。</li>
+                    <li>プロジェクトの横にある <strong>Phases</strong> タブをクリックします。</li>
+                    <li><strong>Add Phase</strong> をクリックし、フェーズ名（例：<code>Build</code>）を入力して <strong>Save</strong> をクリックし、プロジェクトを分割します。</li>
+                </ol>
             </div>
         </section>
 
@@ -444,17 +488,21 @@
                 <span class="module-tag">Module 04</span>
                 <span class="role-badge role-admin" lang="en">ADMIN</span>
                 <span class="role-badge role-admin" lang="th">ผู้ดูแลระบบ</span>
+                <span class="role-badge role-admin" lang="ja">管理者</span>
             </div>
             <h2 lang="en">Work Breakdown Structure (WBS)</h2>
             <h2 lang="th">โครงสร้างการแบ่งงาน (WBS) และแผนภูมิแกนต์</h2>
+            <h2 lang="ja">タスク計画 (WBS)</h2>
             <p class="module-desc" lang="en">Structure hierarchical tasks, enforce task dependencies, configure plan estimations, and inspect the Gantt timeline.</p>
             <p class="module-desc" lang="th">สร้างผังการแบ่งงานลำดับย่อย กำหนดการเชื่อมต่อและความสัมพันธ์ระหว่างงาน วางแผนปริมาณกำลังคน และดูภาพรวมผ่านแผนภูมิแกนต์</p>
+            <p class="module-desc" lang="ja">階層的なタスクを構造化し、タスクの依存関係を強制し、計画の見積もりを設定し、ガントタイムラインを検査します。</p>
             <div class="media-container">
                 <img src="assets/04_task_planning.webp" alt="Task Planning Walkthrough" class="walkthrough-media" />
             </div>
             <div class="steps-container">
                 <h3 class="steps-title" lang="en">Step-by-Step Instructions</h3>
                 <h3 class="steps-title" lang="th">ขั้นตอนการใช้งาน</h3>
+                <h3 class="steps-title" lang="ja">手順</h3>
                 <ol class="steps-list" lang="en">
                     <li>Go to the <strong>Plans</strong> page from the left sidebar.</li>
                     <li>Select the target <strong>Project</strong> and <strong>Phase</strong> from the dropdown filters.</li>
@@ -471,6 +519,14 @@
                     <li>หากต้องการจัดกลุ่มแบบลำดับชั้น ให้ระบุ <strong>งานหลัก (Parent Task)</strong> ในตัวเลือก (เช่น นำงาน <code>UI Components</code> ไปเป็นงานย่อยภายใต้ <code>Project Foundation</code>)</li>
                     <li>คลิกปุ่ม <strong>Save</strong> ผังโครงการจะแสดงผลแบบลำดับขั้นควบคู่กับ <strong>แผนภูมิแกนต์ (Gantt Chart)</strong> ทันที</li>
                 </ol>
+            <ol class="steps-list" lang="ja">
+                    <li>左側のサイドバーから <strong>Plans</strong> ページに移動します。</li>
+                    <li>ドロップダウンフィルターから対象の <strong>Project (プロジェクト)</strong> と <strong>Phase (フェーズ)</strong> を選択します。</li>
+                    <li><strong>Add Task</strong> ボタンをクリックして、WBSに新しいタスクを追加します。</li>
+                    <li><strong>タスクの説明</strong>, <strong>開始日</strong>, <strong>終了日</strong>, <strong>予定時間</strong> を入力し、チームメンバーに割り当てます。</li>
+                    <li>階層を作成するには、ドロップダウンメニューから <strong>Parent Task (親タスク)</strong> を設定します（例：<code>UI Components</code> を <code>Project Foundation</code> の下にネストする）。</li>
+                    <li><strong>Save</strong> をクリックすると、タスクツリーとインタラクティブな <strong>ガントチャート</strong> が表示されます。</li>
+                </ol>
             </div>
         </section>
 
@@ -480,17 +536,21 @@
                 <span class="module-tag">Module 05</span>
                 <span class="role-badge role-admin" lang="en">ADMIN</span>
                 <span class="role-badge role-admin" lang="th">ผู้ดูแลระบบ</span>
+                <span class="role-badge role-admin" lang="ja">管理者</span>
             </div>
             <h2 lang="en">Team & Member Onboarding</h2>
             <h2 lang="th">การจัดการทีมงานและนำเข้าข้อมูล</h2>
+            <h2 lang="ja">チームとメンバーの登録</h2>
             <p class="module-desc" lang="en">Import corporate members using standardized Excel spreadsheets, maintain manager reporting relationships, and customize team structure.</p>
             <p class="module-desc" lang="th">การลงทะเบียนสมาชิกทีมจำนวนมากผ่านไฟล์เทมเพลต Excel จัดความสัมพันธ์การขึ้นตรงต่อหัวหน้าทีม และปรับเปลี่ยนบทบาทผู้ใช้</p>
+            <p class="module-desc" lang="ja">標準のExcelスプレッドシートを使用して企業のメンバーをインポートし、マネージャーの報告関係を維持します。</p>
             <div class="media-container">
                 <img src="assets/05_bulk_upload.webp" alt="Team Onboarding Walkthrough" class="walkthrough-media" />
             </div>
             <div class="steps-container">
                 <h3 class="steps-title" lang="en">Step-by-Step Instructions</h3>
                 <h3 class="steps-title" lang="th">ขั้นตอนการใช้งาน</h3>
+                <h3 class="steps-title" lang="ja">手順</h3>
                 <ol class="steps-list" lang="en">
                     <li>Go to the <strong>Team</strong> page from the left sidebar.</li>
                     <li>Click the <strong>Bulk Register</strong> or upload section to reveal template actions.</li>
@@ -507,6 +567,14 @@
                     <li>บันทึกไฟล์เทมเพลต จากนั้นกลับมาหน้าเว็บเพื่อเลือกไฟล์และคลิกปุ่ม <strong>Upload</strong></li>
                     <li>ตรวจสอบตารางรายชื่อทีมงานที่จะอัปเดตและแสดงผลความสัมพันธ์การขึ้นตรงต่อหัวหน้างานอย่างถูกต้อง</li>
                 </ol>
+            <ol class="steps-list" lang="ja">
+                    <li>左側のサイドバーから <strong>Team</strong> ページに移動します。</li>
+                    <li><strong>Bulk Register</strong> をクリックしてアップロードセクションを開きます。</li>
+                    <li><strong>Download Template</strong> をクリックして、標準のExcelテンプレートをダウンロードします。</li>
+                    <li>ファイルを開き、従業員の <strong>名前</strong>, <strong>メールアドレス</strong>, <strong>役割</strong> (USER/ADMIN), および <strong>マネージャーのメールアドレス</strong> を入力します。</li>
+                    <li>スプレッドシートを保存し、画面に戻ってファイルを選択またはドラッグし、<strong>Upload</strong> をクリックします。</li>
+                    <li>新しいメンバーとマネージャーの関係がチーム一覧に反映されたことを確認します。</li>
+                </ol>
             </div>
         </section>
 
@@ -516,17 +584,21 @@
                 <span class="module-tag">Module 06</span>
                 <span class="role-badge role-all" lang="en">ALL</span>
                 <span class="role-badge role-all" lang="th">ผู้ใช้ทุกคน</span>
+                <span class="role-badge role-all" lang="ja">すべてのユーザー</span>
             </div>
             <h2 lang="en">Time Logging & Submissions</h2>
             <h2 lang="th">การบันทึกชั่วโมงทำงานและส่งรายงาน</h2>
+            <h2 lang="ja">時間記録と提出</h2>
             <p class="module-desc" lang="en">Log operational hours via Quick Log, review weekly timesheet draft entries, and submit logs for administrative validation.</p>
             <p class="module-desc" lang="th">การลงบันทึกชั่วโมงปฏิบัติงานรายวัน ตรวจสอบแบบร่างบันทึกเวลารายสัปดาห์ และส่งคำขออนุมัติอย่างเป็นทางการ</p>
+            <p class="module-desc" lang="ja">クイックログを介して稼働時間を記録し、毎週のタイムシートの下書きを確認し、管理者の検証のためにログを提出します。</p>
             <div class="media-container">
                 <img src="assets/06_time_logging.webp" alt="Time Logging Walkthrough" class="walkthrough-media" />
             </div>
             <div class="steps-container">
                 <h3 class="steps-title" lang="en">Step-by-Step Instructions</h3>
                 <h3 class="steps-title" lang="th">ขั้นตอนการใช้งาน</h3>
+                <h3 class="steps-title" lang="ja">手順</h3>
                 <ol class="steps-list" lang="en">
                     <li>From the Dashboard, locate the <strong>Quick Log Time</strong> widget.</li>
                     <li>Select the target <strong>Project</strong>, <strong>Phase</strong>, and <strong>WBS Planned Task</strong>.</li>
@@ -541,6 +613,13 @@
                     <li>คลิกปุ่ม <strong>Log Time</strong> บันทึกดังกล่าวจะขึ้นแสดงในระบบเป็นสถานะแบบร่าง (<code>DRAFT</code>)</li>
                     <li>ไปที่หน้า <strong>Time Logs</strong> เลือกรายการแบบร่างที่ต้องการส่งทางด้านหน้า แล้วกดปุ่ม <strong>Submit</strong> เพื่อขออนุมัติอย่างเป็นทางการ</li>
                 </ol>
+            <ol class="steps-list" lang="ja">
+                    <li>ダッシュボードで <strong>Quick Log Time</strong> ウィジェットを見つけます。</li>
+                    <li>対象の <strong>Project</strong>, <strong>Phase</strong>, および <strong>WBS Planned Task</strong> を選択します。</li>
+                    <li><strong>Worked Hours (作業時間)</strong>（例：<code>4</code>）を入力し、作業内容の簡単な説明を記入します。</li>
+                    <li><strong>Log Time</strong> をクリックして保存します。これにより、ステータスが <code>DRAFT</code> として記録されます。</li>
+                    <li><strong>Time Logs</strong> ページに移動します。チェックボックスで下書きの記録を選択し、<strong>Submit</strong> をクリックして承認を申請します。</li>
+                </ol>
             </div>
         </section>
 
@@ -550,17 +629,21 @@
                 <span class="module-tag">Module 07</span>
                 <span class="role-badge role-admin" lang="en">ADMIN</span>
                 <span class="role-badge role-admin" lang="th">ผู้ดูแลระบบ</span>
+                <span class="role-badge role-admin" lang="ja">管理者</span>
             </div>
             <h2 lang="en">Resource Analytics & Heatmaps</h2>
             <h2 lang="th">การวิเคราะห์ประสิทธิภาพและกำลังคน</h2>
+            <h2 lang="ja">リソース分析とヒートマップ</h2>
             <p class="module-desc" lang="en">Analyze team capacity heatmaps, track utilization rates, assess planned-vs-actual variance, and project allocation constraints.</p>
             <p class="module-desc" lang="th">วิเคราะห์ตารางแผนภูมิความร้อนของบุคลากร เปรียบเทียบชั่วโมงงานตามแผนกับที่ลงปฏิบัติงานจริง และประเมินเพื่อลดปัญหาการทำงานหนักเกินไป</p>
+            <p class="module-desc" lang="ja">チームのキャパシティヒートマップを分析し、稼働率を追跡し、計画と実績の差異を評価します。</p>
             <div class="media-container">
                 <img src="assets/07_analytics_reports.webp" alt="Analytics Reports Walkthrough" class="walkthrough-media" />
             </div>
             <div class="steps-container">
                 <h3 class="steps-title" lang="en">Step-by-Step Instructions</h3>
                 <h3 class="steps-title" lang="th">ขั้นตอนการใช้งาน</h3>
+                <h3 class="steps-title" lang="ja">手順</h3>
                 <ol class="steps-list" lang="en">
                     <li>Go to the <strong>Reports</strong> page and click the <strong>Capacity</strong> tab.</li>
                     <li>Set the <strong>Start Date</strong> and <strong>End Date</strong> filters using the datepickers to target a specific calendar sprint.</li>
@@ -585,6 +668,18 @@
                     </li>
                     <li>คลิกปุ่ม <strong>Export Report</strong> มุมบนขวาเพื่อส่งออกข้อมูลตารางกำลังคนในรูปแบบ CSV</li>
                 </ol>
+            <ol class="steps-list" lang="ja">
+                    <li><strong>Reports</strong> ページに移動し、<strong>Capacity</strong> タブをクリックします。</li>
+                    <li>日付ピッカーを使用して <strong>Start Date (開始日)</strong> と <strong>End Date (終了日)</strong> を設定し、特定の期間を指定します。</li>
+                    <li><strong>Resource Heatmap (リソースヒートマップ)</strong> を確認します：
+                        <ul>
+                            <li>🟩 <strong>緑色</strong>: 通常の割り当てと健全な稼働率。</li>
+                            <li>🟥 <strong>赤色</strong>: リソースの過剰割り当て（1日に8時間以上）。</li>
+                            <li>⬛ <strong>灰色</strong>: 週末および会社の休日。</li>
+                        </ul>
+                    </li>
+                    <li>右上の <strong>Export Report</strong> ボタンをクリックして、CSV形式の容量レポートをダウンロードします。</li>
+                </ol>
             </div>
         </section>
 
@@ -594,17 +689,21 @@
                 <span class="module-tag">Module 08</span>
                 <span class="role-badge role-super" lang="en">SUPER ADMIN</span>
                 <span class="role-badge role-super" lang="th">ผู้ดูแลระบบระดับสูง</span>
+                <span class="role-badge role-super" lang="ja">スーパー管理者</span>
             </div>
             <h2 lang="en">Superadmin Config & Branding</h2>
             <h2 lang="th">การกำหนดค่าระบบและการทำแบรนด์องค์กร</h2>
+            <h2 lang="ja">スーパー管理者の設定とブランディング</h2>
             <p class="module-desc" lang="en">Apply white-label customization including theme branding colors, upload organization logos, and audit isolation profiles.</p>
             <p class="module-desc" lang="th">การจัดการธีมส่วนกลางขององค์กร อัปโหลดโลโก้บริษัท ปรับเปลี่ยนสีองค์ประกอบหลักเพื่อควบคุมอัตลักษณ์ และการเข้าถึงระบบแบบแยกผู้เช่า</p>
+            <p class="module-desc" lang="ja">テーマのブランディングカラー、組織ロゴのアップロードなど、ホワイトラベルのカスタマイズを適用します。</p>
             <div class="media-container">
                 <img src="assets/08_superadmin_config.webp" alt="Superadmin Configuration Walkthrough" class="walkthrough-media" />
             </div>
             <div class="steps-container">
                 <h3 class="steps-title" lang="en">Step-by-Step Instructions</h3>
                 <h3 class="steps-title" lang="th">ขั้นตอนการใช้งาน</h3>
+                <h3 class="steps-title" lang="ja">手順</h3>
                 <ol class="steps-list" lang="en">
                     <li>Navigate to the <strong>Admin Settings</strong> (or Admin) page from the sidebar.</li>
                     <li>Find the <strong>Branding Customization</strong> panel.</li>
@@ -618,6 +717,13 @@
                     <li>กรอกรหัสสีหลักขององค์กรที่คุณต้องการปรับ (เช่น รหัสสีส้ม <code>#ff5722</code> หรือเลือกจากแถบสี)</li>
                     <li>ใช้เมนูอัปโหลดไฟล์ในการเปลี่ยนภาพ <strong>โลโก้ของบริษัท (Logo image)</strong></li>
                     <li>คลิกปุ่ม <strong>Save Customization</strong> สีสันของปุ่มควบคุมและโลโก้หลักในเมนูด้านซ้ายจะเปลี่ยนตามอัตลักษณ์องค์กรทันที</li>
+                </ol>
+            <ol class="steps-list" lang="ja">
+                    <li>サイドバーから <strong>Admin Settings</strong>（または Admin）ページに移動します。</li>
+                    <li><strong>Branding Customization</strong> パネルを見つけます。</li>
+                    <li>カスタムのプライマリテーマカラーを入力します（例：オレンジの場合は <code>#ff5722</code>、またはパレットから選択）。</li>
+                    <li>アップロードウィジェットを使用して、企業の <strong>ロゴ画像</strong> を選択します。</li>
+                    <li><strong>Save Customization</strong> をクリックします。サイドバーのロゴとテーマのアクセントカラーがリアルタイムで更新されることを確認します。</li>
                 </ol>
             </div>
         </section>

@@ -5,6 +5,7 @@ import DailyTargetChart from '../DailyTargetChart';
 import CalendarWidget from '../CalendarWidget';
 import SmartInsights from '../SmartInsights';
 import AuditInspector from '../AuditInspector';
+import OnboardingTour from '../OnboardingTour';
 import type { TimeEntry, AuditLog } from '../../types';
 import { getEntries, getAuditLogs } from '../../api';
 import { useAuth } from '../../context/AuthContext';
@@ -69,9 +70,10 @@ const HomePage: React.FC = () => {
 
   return (
     <div className="px-8 py-6">
+      <OnboardingTour />
       <div className="grid grid-cols-12 gap-5 auto-rows-[minmax(180px,auto)]">
         {/* Quick Log Form */}
-        <div className="col-span-12 lg:col-span-8 glass-card p-7 animate-slideUp opacity-0 delay-1" style={{ animationFillMode: 'forwards' }}>
+        <div className="col-span-12 lg:col-span-8 glass-card p-7 animate-slideUp opacity-0 delay-1 tour-quick-log" style={{ animationFillMode: 'forwards' }}>
           <TimeEntryForm 
             onEntrySaved={() => { fetchEntries(); setEditingEntry(null); }} 
             selectedDate={selectedDate} 
@@ -82,12 +84,12 @@ const HomePage: React.FC = () => {
         </div>
 
         {/* Daily Target Chart */}
-        <div className="col-span-12 lg:col-span-4 glass-card p-7 flex items-center justify-center animate-slideUp opacity-0 delay-2" style={{ animationFillMode: 'forwards' }}>
+        <div className="col-span-12 lg:col-span-4 glass-card p-7 flex items-center justify-center animate-slideUp opacity-0 delay-2 tour-daily-chart" style={{ animationFillMode: 'forwards' }}>
           <DailyTargetChart hoursLogged={selectedDateHours || 0} targetHours={8} selectedDate={selectedDate} />
         </div>
 
         {/* Main Dashboard / Recent Logs */}
-        <div className="col-span-12 lg:col-span-8 glass-card p-7 min-h-[480px] animate-slideUp opacity-0 delay-3" style={{ animationFillMode: 'forwards' }}>
+        <div className="col-span-12 lg:col-span-8 glass-card p-7 min-h-[480px] animate-slideUp opacity-0 delay-3 tour-dashboard" style={{ animationFillMode: 'forwards' }}>
           {isLoading ? (
             <div className="h-full flex flex-col gap-3">
               <div className="skeleton h-4 w-32" />
@@ -106,10 +108,10 @@ const HomePage: React.FC = () => {
 
         {/* Right Column: Insights & Calendar */}
         <div className="col-span-12 lg:col-span-4 flex flex-col gap-5 animate-slideUp opacity-0 delay-4" style={{ animationFillMode: 'forwards' }}>
-          <div className="flex-1 glass-card p-7 min-h-[230px]">
+          <div className="flex-1 glass-card p-7 min-h-[230px] tour-smart-insights">
             <SmartInsights onSelectTask={handleSelectSuggestion} />
           </div>
-          <div className="glass-card p-7">
+          <div className="glass-card p-7 tour-calendar">
             <CalendarWidget entries={entries} selectedDate={selectedDate} onSelectDate={setSelectedDate} />
           </div>
         </div>

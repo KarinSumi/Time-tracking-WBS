@@ -11,6 +11,56 @@ servers:
   - url: http://localhost:5050
     description: Local development server
 paths:
+  /health:
+    get:
+      summary: System Health
+      description: Returns 200 OK if the system is up and running.
+      tags:
+        - System
+      responses:
+        '200':
+          description: OK
+  /api/smart-insights/next-task:
+    get:
+      summary: Suggest Next Task
+      description: Returns an AI or logic-driven suggestion for the next task to work on based on user's active plans and history.
+      tags:
+        - Smart Insights
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful suggestion
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  type:
+                    type: string
+                  plannedTaskId:
+                    type: string
+                    nullable: true
+                  projectId:
+                    type: string
+                    nullable: true
+                  phaseId:
+                    type: string
+                    nullable: true
+                  projectName:
+                    type: string
+                  phaseName:
+                    type: string
+                  taskDescription:
+                    type: string
+                  title:
+                    type: string
+                  description:
+                    type: string
+                  hoursLeft:
+                    type: number
+        '500':
+          description: Failed to fetch next task suggestion
   /api/auth/login:
     post:
       summary: User Login

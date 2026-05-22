@@ -107,6 +107,8 @@ model TimeEntry {
   hours           Decimal
   taskDescription String
   status          String       @default("DRAFT")
+  billable        Boolean      @default(false)
+  billingRate     Float?
   createdAt       DateTime     @default(now())
   updatedAt       DateTime     @updatedAt
   plannedTask     PlannedTask? @relation(fields: [plannedTaskId], references: [id])
