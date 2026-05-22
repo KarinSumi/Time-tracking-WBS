@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import { ZodSchema } from 'zod';
 
 /**
  * Middleware to ensure required fields are present in the request body.
@@ -42,3 +43,50 @@ export const validateType = (field: string, type: 'number' | 'string' | 'date') 
     next();
   };
 };
+
+/**
+ * Generic middleware factory to validate request body using a Zod schema.
+ */
+export const validateBody = (schema: ZodSchema) => {
+  return (req: Request, res: Response, next: NextFunction) => {
+    const result = schema.safeParse(req.body);
+    if (!result.success) {
+      const issues = result.error.issues || [];
+      const firstError = issues[0];
+      const errorMsg = firstError ? firstError.message : 'Validation failed';
+      res.status(400).json({
+        error: errorMsg,
+        details: issues
+      });
+      return;
+    }
+    req.body = result.data;
+    next();
+  };
+};
+
+/**
+ * Generic middleware factory to validate request params using a Zod schema.
+ */
+export const validateParams = (schema: ZodSchema) => {
+  return (req: Request, res: Response, next: NextFunction) => {
+    const result = schema.safeParse(req.params);
+    if (!result.success) {
+      const issues = result.error.issues || [];
+      const firstError = issues[0];
+      const errorMsg = firstError ? firstError.message : 'Validation failed';
+      res.status(400).json({
+        error: errorMsg,
+        details: issues
+      });
+      return;
+    }
+    req.params = result.data;
+    next();
+  };
+};
+
+import { z } from 'zod';
+export const idParamSchema = z.object({
+  id: z.string().uuid('Invalid UUID format')
+});

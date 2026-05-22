@@ -29,7 +29,8 @@
     "prisma": "^6.2.1",
     "swagger-ui-express": "^5.0.1",
     "xlsx": "^0.18.5",
-    "yamljs": "^0.3.0"
+    "yamljs": "^0.3.0",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",

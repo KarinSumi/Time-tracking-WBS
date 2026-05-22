@@ -3,7 +3,7 @@ import multer from 'multer';
 import * as XLSX from 'xlsx';
 import type { AuthRequest } from '../middleware/auth';
 import { authMiddleware } from '../middleware/auth';
-import { requireFields } from '../middleware/validate';
+import { requireFields, validateParams, idParamSchema } from '../middleware/validate';
 import * as PlannedTaskService from '../services/PlannedTaskService';
 import * as UserService from '../services/UserService';
 
@@ -29,20 +29,20 @@ router.post('/', authMiddleware, requireFields(['assigneeId', 'taskDescription',
   }
 });
 
-router.put('/:id', authMiddleware, async (req: AuthRequest, res) => {
+router.put('/:id', authMiddleware, validateParams(idParamSchema), async (req: AuthRequest, res) => {
   try {
     const context = { userId: req.userId!, orgId: req.orgId!, role: req.userRole! };
-    const plan = await PlannedTaskService.updatePlan(req.params.id as string, req.body, context);
+    const plan = await PlannedTaskService.updatePlan(req.params.id, req.body, context);
     res.json(plan);
   } catch (error: any) {
     res.status(error.message === 'Unauthorized' ? 403 : 404).json({ error: error.message });
   }
 });
 
-router.delete('/:id', authMiddleware, async (req: AuthRequest, res) => {
+router.delete('/:id', authMiddleware, validateParams(idParamSchema), async (req: AuthRequest, res) => {
   try {
     const context = { userId: req.userId!, orgId: req.orgId!, role: req.userRole! };
-    await PlannedTaskService.deletePlan(req.params.id as string, context);
+    await PlannedTaskService.deletePlan(req.params.id, context);
     res.json({ success: true });
   } catch (error: any) {
     res.status(error.message === 'Unauthorized' ? 403 : 404).json({ error: error.message });

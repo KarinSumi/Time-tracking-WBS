@@ -1,6 +1,7 @@
 import express from 'express';
 import type { AuthRequest } from '../middleware/auth';
 import { authMiddleware } from '../middleware/auth';
+import { validateParams, idParamSchema } from '../middleware/validate';
 import { listHolidays, createHoliday, updateHoliday, deleteHoliday } from '../services/HolidayService';
 
 const router = express.Router();
@@ -41,9 +42,9 @@ router.post('/', authMiddleware, async (req: AuthRequest, res) => {
  * PUT /api/holidays/:id
  * Updates an existing holiday.
  */
-router.put('/:id', authMiddleware, async (req: AuthRequest, res) => {
+router.put('/:id', authMiddleware, validateParams(idParamSchema), async (req: AuthRequest, res) => {
   try {
-    const holiday = await updateHoliday(req.params.id as string, req.body, { userId: req.userId!, orgId: req.orgId!, role: req.userRole! });
+    const holiday = await updateHoliday(req.params.id, req.body, { userId: req.userId!, orgId: req.orgId!, role: req.userRole! });
     res.json(holiday);
   } catch (error: any) {
     console.error('Update holiday error:', error);
@@ -56,9 +57,9 @@ router.put('/:id', authMiddleware, async (req: AuthRequest, res) => {
  * DELETE /api/holidays/:id
  * Deletes a holiday record.
  */
-router.delete('/:id', authMiddleware, async (req: AuthRequest, res) => {
+router.delete('/:id', authMiddleware, validateParams(idParamSchema), async (req: AuthRequest, res) => {
   try {
-    await deleteHoliday(req.params.id as string, { userId: req.userId!, orgId: req.orgId!, role: req.userRole! });
+    await deleteHoliday(req.params.id, { userId: req.userId!, orgId: req.orgId!, role: req.userRole! });
     res.status(204).send();
   } catch (error: any) {
     console.error('Delete holiday error:', error);

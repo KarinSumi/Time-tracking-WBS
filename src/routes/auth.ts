@@ -5,16 +5,26 @@ import path from 'path';
 import { login, register, getMe, updateAvatar, bulkRegister, BulkUserRow } from '../services/AuthService';
 import { requireAdmin } from '../middleware/tenant';
 import * as xlsx from 'xlsx';
+import { z } from 'zod';
+import { validateBody } from '../middleware/validate';
 
 const router = express.Router();
 
+const loginSchema = z.object({
+  email: z.any().refine(val => typeof val === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val), { message: 'Invalid email format' }),
+  password: z.any().refine(val => typeof val === 'string' && val.length >= 8, { message: 'Password must be at least 8 characters long.' })
+});
+
+const registerSchema = z.object({
+  name: z.any().refine(val => typeof val === 'string' && val.trim() !== '', { message: 'Name is required' }),
+  email: z.any().refine(val => typeof val === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val), { message: 'Invalid email format' }),
+  password: z.any().refine(val => typeof val === 'string' && val.length >= 8, { message: 'Password must be at least 8 characters long.' }),
+  orgName: z.any().refine(val => typeof val === 'string' && val.trim() !== '', { message: 'Organization name is required' })
+});
+
 // POST /api/auth/login
-router.post('/login', async (req, res) => {
+router.post('/login', validateBody(loginSchema), async (req, res) => {
   const { email, password } = req.body;
-  if (!email || !password) {
-    res.status(400).json({ error: 'Email and password are required' });
-    return;
-  }
 
   try {
     const result = await login(email, password);
@@ -32,12 +42,8 @@ router.post('/login', async (req, res) => {
 });
 
 // POST /api/auth/register
-router.post('/register', async (req, res) => {
+router.post('/register', validateBody(registerSchema), async (req, res) => {
   const { name, email, password, orgName } = req.body;
-  if (!email || !password || !name) {
-    res.status(400).json({ error: 'Name, email, and password are required' });
-    return;
-  }
 
   try {
     const result = await register(name, email, password, orgName);

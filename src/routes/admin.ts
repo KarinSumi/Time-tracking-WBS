@@ -2,6 +2,7 @@ import express from 'express';
 import multer from 'multer';
 import type { AuthRequest } from '../middleware/auth';
 import { authMiddleware } from '../middleware/auth';
+import { validateParams, idParamSchema } from '../middleware/validate';
 import * as AdminService from '../services/AdminService';
 import * as UserService from '../services/UserService';
 import * as TimeEntryService from '../services/TimeEntryService';
@@ -40,10 +41,10 @@ router.get('/entries', async (req: AuthRequest, res) => {
   }
 });
 
-router.patch('/entries/:id', async (req: AuthRequest, res) => {
+router.patch('/entries/:id', validateParams(idParamSchema), async (req: AuthRequest, res) => {
   try {
     const context = { userId: req.userId!, orgId: req.orgId!, role: req.userRole! };
-    const updatedEntry = await TimeEntryService.updateTimeEntry(req.params.id as string, req.body, context);
+    const updatedEntry = await TimeEntryService.updateTimeEntry(req.params.id, req.body, context);
     res.json(updatedEntry);
   } catch (error: any) {
     res.status(400).json({ error: error.message });
