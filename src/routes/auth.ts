@@ -43,8 +43,9 @@ router.post('/register', async (req, res) => {
     const result = await register(name, email, password, orgName);
     res.status(201).json(result);
   } catch (error: any) {
-    const status = error.message.includes('complexity') || error.message.includes('Password') ? 400 : (error.message.includes('already exists') ? 409 : 500);
-    res.status(status).json({ error: error.message || 'Internal server error' });
+    const msg = error.message || '';
+    const status = msg.includes('complexity') || msg.includes('Password') || msg.includes('Organization') ? 400 : (msg.includes('already exists') ? 409 : 500);
+    res.status(status).json({ error: msg || 'Internal server error' });
   }
 });
 

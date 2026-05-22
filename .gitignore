@@ -7,3 +7,8 @@ dist
 *.db
 !prisma/sample.db
 uploads/
+
+# DevOps & temporary files
+*.zip
+*.log
+test_output.txt

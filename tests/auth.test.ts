@@ -41,11 +41,24 @@ describe('Auth API', () => {
     expect(res.body.error).toContain('at least 8 characters');
   });
 
+  it('should reject registration when organization name is missing', async () => {
+    const res = await request(app)
+      .post('/api/auth/register')
+      .send({
+        name: 'No Org User',
+        email: 'noorg@example.com',
+        password: 'Password123!'
+      });
+    expect(res.status).toBe(400);
+    expect(res.body.error).toContain('Organization name is required');
+  });
+
   it('should login an existing user', async () => {
     const regRes = await request(app).post('/api/auth/register').send({
       name: 'Jane Doe',
       email: 'jane@example.com',
-      password: 'Password123!'
+      password: 'Password123!',
+      orgName: 'Acme Corp'
     });
     
     expect(regRes.status).toBe(201);
@@ -67,7 +80,8 @@ describe('Auth API', () => {
     const regRes = await request(app).post('/api/auth/register').send({
       name: 'Lockout User',
       email: 'lockout@example.com',
-      password: 'Password123!'
+      password: 'Password123!',
+      orgName: 'Acme Corp'
     });
     expect(regRes.status).toBe(201);
 
