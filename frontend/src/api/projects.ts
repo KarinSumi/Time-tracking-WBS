@@ -1,9 +1,9 @@
-import { apiFetch } from './client';
+import { axiosClient } from './client';
 import type { Project } from '../types';
 
-export const getProjects = () => apiFetch<Project[]>('/projects');
-export const getProject = (id: string) => apiFetch<Project>(`/projects/${id}`);
-export const createProject = (data: Partial<Project>) => apiFetch<Project>('/projects', { method: 'POST', body: JSON.stringify(data) });
-export const updateProject = (id: string, data: Partial<Project>) => apiFetch<Project>(`/projects/${id}`, { method: 'PUT', body: JSON.stringify(data) });
-export const deleteProject = (id: string) => apiFetch<void>(`/projects/${id}`, { method: 'DELETE' });
-export const getProjectStats = (id: string) => apiFetch<any>(`/projects/${id}/stats`);
+export const getProjects = () => axiosClient.get<Project[]>('/projects');
+export const getProject = (id: string) => axiosClient.get<Project>(`/projects/${id}`);
+export const createProject = (data: Partial<Project>) => axiosClient.post<Project>('/projects', data);
+export const updateProject = (id: string, data: Partial<Project>) => axiosClient.put<Project>(`/projects/${id}`, data);
+export const deleteProject = (id: string) => axiosClient.delete<void>(`/projects/${id}`);
+export const getProjectStats = (id: string) => axiosClient.get<any>(`/projects/${id}/stats`);

@@ -1,4 +1,4 @@
-import { apiFetch } from './client';
+import { axiosClient } from './client';
 
 export interface NextTaskSuggestion {
   type: 'PLAN' | 'PROJECT_FALLBACK' | 'GENERAL_FALLBACK' | 'NO_TASKS';
@@ -13,4 +13,4 @@ export interface NextTaskSuggestion {
   hoursLeft: number;
 }
 
-export const suggestNextTask = () => apiFetch<NextTaskSuggestion>('/suggestions/next-task');
+export const suggestNextTask = () => axiosClient.get<NextTaskSuggestion>('/suggestions/next-task');

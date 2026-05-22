@@ -1,27 +1,37 @@
-const API_BASE = '/api';
+import axios from 'axios';
+import type { AxiosRequestConfig } from 'axios';
 
-export async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
-  const token = localStorage.getItem('auth_token');
-  const headers: Record<string, string> = { ...(options.headers as Record<string, string> || {}) };
-  
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
+const instance = axios.create({
+  baseURL: '/api',
+});
+
+instance.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('auth_token');
+    if (token && config.headers) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+instance.interceptors.response.use(
+  (response) => {
+    return response.data;
+  },
+  (error) => {
+    const message = error.response?.data?.error || error.message || 'Request failed';
+    return Promise.reject(new Error(message));
   }
-  
-  if (!(options.body instanceof FormData)) {
-    headers['Content-Type'] = 'application/json';
-  }
-  
-  const res = await fetch(`${API_BASE}${path}`, { ...options, headers });
-  
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.error || `Request failed: ${res.status}`);
-  }
-  
-  if (res.status === 204) {
-    return undefined as T;
-  }
-  
-  return res.json();
+);
+
+export interface CustomAxiosInstance {
+  get<T = any>(url: string, config?: AxiosRequestConfig): Promise<T>;
+  post<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T>;
+  put<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T>;
+  patch<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T>;
+  delete<T = any>(url: string, config?: AxiosRequestConfig): Promise<T>;
 }
+
+export const axiosClient = instance as unknown as CustomAxiosInstance;

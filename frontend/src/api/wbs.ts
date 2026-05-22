@@ -1,3 +1,3 @@
-import { apiFetch } from './client';
+import { axiosClient } from './client';
 
-export const getWbsGantt = (projectId: string) => apiFetch<any[]>(`/wbs-gantt/${projectId}`);
+export const getWbsGantt = (projectId: string) => axiosClient.get<any[]>(`/wbs-gantt/${projectId}`);

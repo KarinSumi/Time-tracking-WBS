@@ -1,8 +1,8 @@
-import { apiFetch } from './client';
+import { axiosClient } from './client';
 import type { User } from '../types';
 
-export const login = (data: any) => apiFetch<{ token: string; user: User }>('/auth/login', { method: 'POST', body: JSON.stringify(data) });
-export const register = (data: any) => apiFetch<{ token: string; user: User }>('/auth/register', { method: 'POST', body: JSON.stringify(data) });
-export const getMe = () => apiFetch<User>('/auth/me');
-export const uploadAvatar = (formData: FormData) => apiFetch<{ avatarUrl: string }>('/auth/profile/avatar', { method: 'POST', body: formData });
-export const bulkRegisterUsers = (formData: FormData) => apiFetch<{ created: number; skipped: number; errors: string[] }>('/auth/bulk-register', { method: 'POST', body: formData });
+export const login = (data: any) => axiosClient.post<{ token: string; user: User }>('/auth/login', data);
+export const register = (data: any) => axiosClient.post<{ token: string; user: User }>('/auth/register', data);
+export const getMe = () => axiosClient.get<User>('/auth/me');
+export const uploadAvatar = (formData: FormData) => axiosClient.post<{ avatarUrl: string }>('/auth/profile/avatar', formData);
+export const bulkRegisterUsers = (formData: FormData) => axiosClient.post<{ created: number; skipped: number; errors: string[] }>('/auth/bulk-register', formData);

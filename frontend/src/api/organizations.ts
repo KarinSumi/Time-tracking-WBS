@@ -1,6 +1,6 @@
-import { apiFetch } from './client';
+import { axiosClient } from './client';
 import type { Organization } from '../types';
 
-export const getSettings = () => apiFetch<Organization>('/organizations/settings');
-export const updateSettings = (data: Partial<Organization>) => apiFetch<Organization>('/organizations/settings', { method: 'PATCH', body: JSON.stringify(data) });
-export const uploadLogo = (formData: FormData) => apiFetch<{ logoUrl: string }>('/organizations/logo', { method: 'POST', body: formData });
+export const getSettings = () => axiosClient.get<Organization>('/organizations/settings');
+export const updateSettings = (data: Partial<Organization>) => axiosClient.patch<Organization>('/organizations/settings', data);
+export const uploadLogo = (formData: FormData) => axiosClient.post<{ logoUrl: string }>('/organizations/logo', formData);

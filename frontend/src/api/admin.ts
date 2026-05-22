@@ -1,14 +1,14 @@
-import { apiFetch } from './client';
+import { axiosClient } from './client';
 import type { TimeEntry, User, AuditLog } from '../types';
 
 export const getAdminEntries = (params: any = {}) => {
   const searchParams = new URLSearchParams(params as any);
-  return apiFetch<TimeEntry[]>(`/admin/entries?${searchParams.toString()}`);
+  return axiosClient.get<TimeEntry[]>(`/admin/entries?${searchParams.toString()}`);
 };
-export const getAdminUsers = () => apiFetch<User[]>('/admin/users');
-export const updateAdminEntry = (id: string, data: any) => apiFetch<TimeEntry>(`/admin/entries/${id}`, { method: 'PATCH', body: JSON.stringify(data) });
-export const createAdminEntry = (data: any) => apiFetch<TimeEntry>('/admin/entries', { method: 'POST', body: JSON.stringify(data) });
-export const uploadAdminEntries = (formData: FormData) => apiFetch<{ created: number; errors: number }>('/admin/entries/upload', { method: 'POST', body: formData });
-export const getAuditLogs = () => apiFetch<AuditLog[]>('/admin/audit-logs');
-export const getAdminStatus = () => apiFetch<any>('/admin/status');
-export const unlockAdminAccount = (email: string) => apiFetch<{ success: boolean; message: string }>('/admin/status/unlock', { method: 'POST', body: JSON.stringify({ email }) });
+export const getAdminUsers = () => axiosClient.get<User[]>('/admin/users');
+export const updateAdminEntry = (id: string, data: any) => axiosClient.patch<TimeEntry>(`/admin/entries/${id}`, data);
+export const createAdminEntry = (data: any) => axiosClient.post<TimeEntry>('/admin/entries', data);
+export const uploadAdminEntries = (formData: FormData) => axiosClient.post<{ created: number; errors: number }>('/admin/entries/upload', formData);
+export const getAuditLogs = () => axiosClient.get<AuditLog[]>('/admin/audit-logs');
+export const getAdminStatus = () => axiosClient.get<any>('/admin/status');
+export const unlockAdminAccount = (email: string) => axiosClient.post<{ success: boolean; message: string }>('/admin/status/unlock', { email });

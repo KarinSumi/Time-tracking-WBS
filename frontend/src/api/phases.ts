@@ -1,7 +1,7 @@
-import { apiFetch } from './client';
+import { axiosClient } from './client';
 import type { Phase } from '../types';
 
-export const getPhases = () => apiFetch<Phase[]>('/phases');
-export const createPhase = (data: Partial<Phase>) => apiFetch<Phase>('/phases', { method: 'POST', body: JSON.stringify(data) });
-export const updatePhase = (id: string, data: Partial<Phase>) => apiFetch<Phase>(`/phases/${id}`, { method: 'PUT', body: JSON.stringify(data) });
-export const deletePhase = (id: string) => apiFetch<void>(`/phases/${id}`, { method: 'DELETE' });
+export const getPhases = () => axiosClient.get<Phase[]>('/phases');
+export const createPhase = (data: Partial<Phase>) => axiosClient.post<Phase>('/phases', data);
+export const updatePhase = (id: string, data: Partial<Phase>) => axiosClient.put<Phase>(`/phases/${id}`, data);
+export const deletePhase = (id: string) => axiosClient.delete<void>(`/phases/${id}`);

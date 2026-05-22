@@ -1,7 +1,7 @@
-import { apiFetch } from './client';
+import { axiosClient } from './client';
 import type { User } from '../types';
 
-export const getTeam = () => apiFetch<User[]>('/team');
+export const getTeam = () => axiosClient.get<User[]>('/team');
 export const getTeamMembers = getTeam;
-export const updateMemberRole = (memberId: string, role: string) => apiFetch<User>(`/team/${memberId}/role`, { method: 'PATCH', body: JSON.stringify({ role }) });
-export const updateMemberManager = (memberId: string, managerId: string | null) => apiFetch<User>(`/team/${memberId}/manager`, { method: 'PATCH', body: JSON.stringify({ managerId }) });
+export const updateMemberRole = (memberId: string, role: string) => axiosClient.patch<User>(`/team/${memberId}/role`, { role });
+export const updateMemberManager = (memberId: string, managerId: string | null) => axiosClient.patch<User>(`/team/${memberId}/manager`, { managerId });
