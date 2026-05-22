@@ -13,18 +13,18 @@ import {
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-
-
+import { useLanguage } from '../context/LanguageContext';
+import LanguageSelector from './LanguageSelector';
 
 const menuItems = [
-  { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
-  { icon: Clock, label: 'Time Logs', path: '/logs' },
-  { icon: Clock, label: 'Bulk Entry', path: '/bulk-entry' },
-  { icon: Briefcase, label: 'Plans', path: '/plans' },
-  { icon: Briefcase, label: 'Projects', path: '/projects', minRole: 'ADMIN' },
-  { icon: Users, label: 'Team', path: '/team', minRole: 'ADMIN' },
-  { icon: BarChart3, label: 'Reports', path: '/reports', minRole: 'ADMIN' },
-  { icon: Settings, label: 'Settings', path: '/settings' },
+  { icon: LayoutDashboard, label: 'Dashboard', path: '/', key: 'nav.dashboard' },
+  { icon: Clock, label: 'Time Logs', path: '/logs', key: 'nav.logs' },
+  { icon: Clock, label: 'Bulk Entry', path: '/bulk-entry', key: 'nav.bulk' },
+  { icon: Briefcase, label: 'Plans', path: '/plans', key: 'nav.plans' },
+  { icon: Briefcase, label: 'Projects', path: '/projects', minRole: 'ADMIN', key: 'nav.projects' },
+  { icon: Users, label: 'Team', path: '/team', minRole: 'ADMIN', key: 'nav.team' },
+  { icon: BarChart3, label: 'Reports', path: '/reports', minRole: 'ADMIN', key: 'nav.reports' },
+  { icon: Settings, label: 'Settings', path: '/settings', key: 'nav.settings' },
 ];
 
 import { getDraftsSummary } from '../api';
@@ -33,6 +33,7 @@ const Sidebar: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout, token } = useAuth();
+  const { t } = useLanguage();
   const [collapsed, setCollapsed] = useState(false);
   const [draftCount, setDraftCount] = useState(0);
 
@@ -90,7 +91,7 @@ const Sidebar: React.FC = () => {
       </button>
 
       {/* Navigation */}
-      <nav className="flex-1 mt-6 px-3">
+      <nav className="flex-1 mt-6 px-3 overflow-y-auto">
         <ul className="space-y-1">
           {(() => {
             const rolePrecedence = { 'USER': 0, 'ADMIN': 1, 'SUPER_ADMIN': 2 };
@@ -103,13 +104,14 @@ const Sidebar: React.FC = () => {
             });
 
             const finalItems = user?.role === 'SUPER_ADMIN' 
-              ? [...baseItems, { icon: Database, label: 'Data Grid', path: '/admin' }] 
+              ? [...baseItems, { icon: Database, label: 'Data Grid', path: '/admin', key: 'nav.admin' }] 
               : baseItems;
 
             return finalItems.map((item) => {
               const isActive = location.pathname === item.path;
+              const translatedLabel = t(item.key);
               return (
-                <li key={item.label}>
+                <li key={item.key}>
                   <button
                     onClick={() => navigate(item.path)}
                     className={`w-full flex items-center gap-3 rounded-xl transition-all duration-200 group relative ${
@@ -119,7 +121,7 @@ const Sidebar: React.FC = () => {
                         ? 'text-[var(--text-primary)]'
                         : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)] hover:bg-[var(--bg-surface-hover)]'
                     }`}
-                    data-tooltip={collapsed ? item.label : undefined}
+                    data-tooltip={collapsed ? translatedLabel : undefined}
                   >
                     {/* Active indicator */}
                     {isActive && (
@@ -134,10 +136,10 @@ const Sidebar: React.FC = () => {
                       }`}
                     />
                     {!collapsed && (
-                      <span className={`text-[13px] font-medium flex-1 ${isActive ? 'text-black' : ''}`}>{item.label}</span>
+                      <span className={`text-[13px] font-medium flex-1 ${isActive ? 'text-black' : ''}`}>{translatedLabel}</span>
                     )}
 
-                    {item.label === 'Time Logs' && draftCount > 0 && (
+                    {item.key === 'nav.logs' && draftCount > 0 && (
                       <div className={`flex items-center justify-center rounded-full bg-blue-500 text-[9px] font-black text-white shadow-[0_0_10px_rgba(59,130,246,0.5)] ${collapsed ? 'absolute top-2 right-2 w-4 h-4' : 'w-5 h-5'}`}>
                         {draftCount}
                       </div>
@@ -159,9 +161,13 @@ const Sidebar: React.FC = () => {
       </nav>
 
       {/* User section at bottom */}
-      <div className="px-3 pb-5 border-t border-[var(--border-subtle)] pt-4">
+      <div className="px-3 pb-5 border-t border-[var(--border-subtle)] pt-4 flex flex-col gap-2">
+        <div className="px-1">
+          <LanguageSelector collapsed={collapsed} />
+        </div>
+        
         {!collapsed && user && (
-          <div className="flex items-center gap-3 px-3 py-2 mb-2">
+          <div className="flex items-center gap-3 px-3 py-2">
             <div className="w-8 h-8 rounded-full bg-[var(--bg-surface-hover)] border border-[var(--border-subtle)] flex items-center justify-center overflow-hidden flex-shrink-0">
               {user.avatarUrl ? (
                 <img src={user.avatarUrl} alt={user.name} className="w-full h-full object-cover" />
@@ -183,10 +189,10 @@ const Sidebar: React.FC = () => {
           className={`w-full flex items-center gap-3 rounded-xl text-[var(--text-muted)] hover:bg-red-500/5 hover:text-red-500 transition-all duration-200 ${
             collapsed ? 'px-0 py-3 justify-center' : 'px-3.5 py-2.5'
           }`}
-          data-tooltip={collapsed ? 'Sign out' : undefined}
+          data-tooltip={collapsed ? t('nav.logout') : undefined}
         >
           <LogOut className="w-[18px] h-[18px] flex-shrink-0" />
-          {!collapsed && <span className="text-[13px] font-medium">Sign out</span>}
+          {!collapsed && <span className="text-[13px] font-medium">{t('nav.logout')}</span>}
         </button>
       </div>
     </aside>
@@ -194,3 +200,4 @@ const Sidebar: React.FC = () => {
 };
 
 export default Sidebar;
+

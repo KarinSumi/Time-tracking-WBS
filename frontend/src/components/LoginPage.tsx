@@ -3,6 +3,8 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { Clock, Mail, Lock, Loader2, Eye, EyeOff } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
+import LanguageSelector from './LanguageSelector';
 
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -11,6 +13,7 @@ const LoginPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
   const { addToast } = useToast();
+  const { t } = useLanguage();
   const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -33,6 +36,11 @@ const LoginPage: React.FC = () => {
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center relative overflow-hidden" style={{ background: 'var(--gradient-login-bg)' }}>
+      {/* Floating Language Selector */}
+      <div className="absolute top-6 right-6 z-50">
+        <LanguageSelector />
+      </div>
+
       <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full opacity-20 blur-[120px] pointer-events-none"
            style={{ background: 'radial-gradient(circle, rgba(59,130,246,0.4), transparent 70%)' }} />
       <div className="absolute bottom-1/4 right-1/4 w-80 h-80 rounded-full opacity-15 blur-[100px] pointer-events-none"
@@ -46,13 +54,13 @@ const LoginPage: React.FC = () => {
               style={{ background: 'var(--gradient-accent)', boxShadow: '0 0 30px rgba(59,130,246,0.25)' }}>
               <Clock className="w-8 h-8 text-white" />
             </div>
-            <h1 className="text-3xl font-bold text-white tracking-tight">Welcome back</h1>
-            <p className="text-white/40 mt-2 text-sm font-medium">Sign in to continue tracking your time</p>
+            <h1 className="text-3xl font-bold text-white tracking-tight">{t('auth.login.title')}</h1>
+            <p className="text-white/40 mt-2 text-sm font-medium text-center leading-relaxed">{t('auth.login.subtitle')}</p>
           </div>
 
           <form onSubmit={handleLogin} className="space-y-5">
             <div className="space-y-2">
-              <label htmlFor="login-email" className="text-[11px] font-semibold text-white/40 uppercase tracking-wider ml-1">Email Address</label>
+              <label htmlFor="login-email" className="text-[11px] font-semibold text-white/40 uppercase tracking-wider ml-1">{t('auth.login.email')}</label>
               <div className="relative">
                 <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-white/30" />
                 <input id="login-email" type="email" disabled={isLoading} className="glass-input w-full pl-11 pr-4 py-3.5 rounded-xl text-sm"
@@ -61,7 +69,7 @@ const LoginPage: React.FC = () => {
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="login-password" className="text-[11px] font-semibold text-white/40 uppercase tracking-wider ml-1">Password</label>
+              <label htmlFor="login-password" className="text-[11px] font-semibold text-white/40 uppercase tracking-wider ml-1">{t('auth.login.password')}</label>
               <div className="relative">
                 <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-white/30" />
                 <input id="login-password" type={showPassword ? 'text' : 'password'} disabled={isLoading}
@@ -77,21 +85,21 @@ const LoginPage: React.FC = () => {
             <div className="flex items-center justify-between">
               <label className="flex items-center text-xs text-white/40 cursor-pointer hover:text-white/60 transition-colors gap-2">
                 <input type="checkbox" className="w-3.5 h-3.5 rounded border-white/20 bg-white/5 accent-blue-500" />
-                <span className="font-medium">Remember me</span>
+                <span className="font-medium">{t('auth.login.remember_me')}</span>
               </label>
-              <Link to="/forgot-password" className="text-xs text-white/40 hover:text-blue-400 transition-colors font-medium">Forgot password?</Link>
+              <Link to="/forgot-password" className="text-xs text-white/40 hover:text-blue-400 transition-colors font-medium">{t('auth.login.forgot_password')}</Link>
             </div>
 
             <button id="login-submit-btn" type="submit" disabled={isLoading}
               className="btn-primary w-full py-4 text-sm font-semibold tracking-wide flex items-center justify-center gap-2 mt-2" style={{ borderRadius: 14 }}>
-              {isLoading ? (<><Loader2 className="w-4 h-4 animate-spin" />Signing in...</>) : 'Sign In'}
+              {isLoading ? (<><Loader2 className="w-4 h-4 animate-spin" />{t('set.saving')}</>) : t('auth.login.submit')}
             </button>
-            <p className="text-[10px] text-center text-white/20 font-medium pt-1">Demo: admin@example.com / password123</p>
+            <p className="text-[10px] text-center text-white/20 font-medium pt-1">{t('auth.login.demo_tip')}</p>
           </form>
 
           <div className="mt-8 text-center">
-            <span className="text-xs text-white/30">Don't have an account? </span>
-            <Link to="/signup" className="text-xs text-blue-400/80 hover:text-blue-400 transition-colors font-medium">Create one</Link>
+            <span className="text-xs text-white/30">{t('auth.login.register_prompt')} </span>
+            <Link to="/signup" className="text-xs text-blue-400/80 hover:text-blue-400 transition-colors font-medium">{t('auth.login.register_link')}</Link>
           </div>
         </div>
       </div>
@@ -100,3 +108,4 @@ const LoginPage: React.FC = () => {
 };
 
 export default LoginPage;
+
