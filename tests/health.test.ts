@@ -9,3 +9,11 @@ describe('GET /health', () => {
     expect(res.status).toBe(200);
   });
 });
+
+describe('GET /api-docs', () => {
+  it('should redirect or return Swagger HTML', async () => {
+    const res = await request(app).get('/api-docs/');
+    expect(res.status).toBe(200);
+    expect(res.text).toContain('swagger');
+  });
+});

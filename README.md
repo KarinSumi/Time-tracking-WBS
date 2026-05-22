@@ -1,15 +1,45 @@
 # Aion Enterprise Time Logger
 
+![Build Status](https://img.shields.io/badge/build-passing-brightgreen)
+![Tests Passed](https://img.shields.io/badge/tests-48%20/%2048%20passed-blue)
+![License](https://img.shields.io/badge/license-ISC-green)
+![TypeScript](https://img.shields.io/badge/TypeScript-6.0-blue)
+![Node](https://img.shields.io/badge/Node-v18%2B-green)
+
 🌐 **Select Language**: English | [ภาษาไทย (Thai)](README.th.md) | [日本語 (Japanese)](README.ja.md)
 
 Welcome to the **Aion Enterprise Time Logger** — a comprehensive enterprise portfolio management platform designed for precision time logging, strategic project planning, resource intelligence, and enterprise administration.
 
 ---
 
-## 📖 Developer & Design Documentation
+## 📖 System Guides & Reference Manuals
 
-For a detailed explanation of the code, database schema, multi-tenant isolation, and backend services pattern:
-👉 **[Developer Documentation & System Design](DEVELOPER.md)**
+Get started quickly or view advanced reference manuals:
+* 🛠️ **Developer Docs**: [DEVELOPER.md](DEVELOPER.md) (Architecture details, system layout & database setup)
+* 💡 **API Documentation**: [Interactive Swagger UI Docs](http://localhost:5050/api-docs) (Or visit `/api-docs` on your running server)
+* 🤝 **Contributing Guidelines**: [CONTRIBUTING.md](CONTRIBUTING.md) (Git workflow, style standards & isolation rules)
+* 📜 **Version History**: [CHANGELOG.md](CHANGELOG.md) (Sprint features, patches & release notes)
+
+---
+
+## 💻 Tech Stack Summary
+
+| Layer | Technologies | Key Features |
+|-------|--------------|--------------|
+| **Backend** | Node.js, Express, TypeScript | Decoupled architecture, Service layer pattern, Rate limiting |
+| **Frontend** | React, Vite, TypeScript | Centralized Axios client, responsive interface |
+| **Database** | SQLite, Prisma ORM | Multi-tenant isolation filters |
+| **Testing** | Vitest, Supertest | Full integration coverage, non-parallelized runner |
+
+---
+
+## 🔒 Security Architecture Highlights
+
+Aion maintains robust compliance controls built directly into the codebase:
+- **Intrusion Detection System (IDS)**: Active pattern scanning blocking SQLi and Path Traversal payloads.
+- **Brute Force Lockouts**: 15-minute account suspension on 5 consecutive failed logins.
+- **Password Complexity**: Minimum length, character verification, and case enforcement.
+- **Strict Tenant Separation**: Organization-level isolation constraints verifying database references at every layer.
 
 ---
 

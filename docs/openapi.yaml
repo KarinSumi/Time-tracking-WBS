@@ -1,0 +1,1356 @@
+openapi: 3.0.0
+info:
+  title: Aion Enterprise Time Logger API
+  version: 1.4.0
+  description: |
+    API documentation for Aion Enterprise Time Logger. 
+    This API serves the React client and allows organization-level tracking, WBS planning, and security management.
+    All routes (except `/api/auth/login` and `/api/auth/register`) require standard Bearer Token Authentication.
+    Tenant isolation is enforced implicitly based on the token context.
+servers:
+  - url: http://localhost:5050
+    description: Local development server
+paths:
+  /api/auth/login:
+    post:
+      summary: User Login
+      description: Authenticates a user and returns a JWT token. Also checks for rate limiting/lockouts.
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: admin@stitch.com
+                password:
+                  type: string
+                  format: password
+                  example: password123
+      responses:
+        '200':
+          description: Successful authentication
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+                  user:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        example: user-123
+                      email:
+                        type: string
+                        example: admin@stitch.com
+                      name:
+                        type: string
+                        example: Stitch Admin
+                      role:
+                        type: string
+                        example: ADMIN
+                      orgId:
+                        type: string
+                        example: org-456
+        '400':
+          description: Email and password are required
+        '401':
+          description: Invalid email or password
+        '423':
+          description: Account is temporarily locked (rate limiter lockout)
+
+  /api/auth/register:
+    post:
+      summary: Register Tenant & User
+      description: Registers a new organization along with its first Super Admin/Admin user.
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+                - name
+                - orgName
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: newadmin@example.com
+                password:
+                  type: string
+                  format: password
+                  example: Password123!
+                name:
+                  type: string
+                  example: New Admin
+                orgName:
+                  type: string
+                  example: Acme Corp
+      responses:
+        '200':
+          description: Successful registration
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+                  user:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        example: user-789
+                      email:
+                        type: string
+                        example: newadmin@example.com
+                      name:
+                        type: string
+                        example: New Admin
+                      role:
+                        type: string
+                        example: ADMIN
+                      orgId:
+                        type: string
+                        example: org-789
+        '400':
+          description: Registration failed (e.g. email already exists, weak password)
+
+  /api/auth/me:
+    get:
+      summary: Current User Profile
+      description: Returns the details of the authenticated caller.
+      tags:
+        - Authentication
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful retrieval
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  email:
+                    type: string
+                  name:
+                    type: string
+                  role:
+                    type: string
+                  orgId:
+                    type: string
+        '401':
+          description: Unauthorized
+
+  /api/auth/profile/avatar:
+    post:
+      summary: Upload Avatar
+      description: Uploads a user profile image avatar.
+      tags:
+        - Authentication
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                avatar:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Successful upload
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  avatarUrl:
+                    type: string
+                    example: /uploads/avatars/avatar-12345.jpg
+
+  /api/auth/bulk-register:
+    post:
+      summary: Bulk Register Users
+      description: Uploads an Excel file containing a team roster for onboarding. Requires Admin role.
+      tags:
+        - Authentication
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Bulk registration successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                    example: 5
+                  message:
+                    type: string
+                    example: Successfully registered 5 users.
+        '400':
+          description: Invalid file or data errors
+        '403':
+          description: Forbidden (Requires Admin)
+
+  /api/entries:
+    get:
+      summary: List Time Entries
+      description: Retrieves time entries filtered by user query. Implicitly filters by user's orgId.
+      tags:
+        - Time Entries
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: userId
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: projectId
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [DRAFT, SUBMITTED, APPROVED, REJECTED]
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 50
+      responses:
+        '200':
+          description: Successful query
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TimeEntry'
+    post:
+      summary: Create Time Entry
+      description: Logs a single work entry in DRAFT status. Enforces project/phase existence.
+      tags:
+        - Time Entries
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - hours
+                - taskDescription
+                - date
+              properties:
+                hours:
+                  type: number
+                  example: 4.5
+                taskDescription:
+                  type: string
+                  example: "Refactored routing structures"
+                date:
+                  type: string
+                  format: date-time
+                  example: "2026-05-22T00:00:00.000Z"
+                projectId:
+                  type: string
+                phaseId:
+                  type: string
+                plannedTaskId:
+                  type: string
+      responses:
+        '201':
+          description: Time entry logged
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TimeEntry'
+        '400':
+          description: Invalid parameters or reference checking failures
+
+  /api/entries/multi-day:
+    post:
+      summary: Create Multi-Day Time Entries
+      description: Logs identical work entries across a range of calendar days.
+      tags:
+        - Time Entries
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - startDate
+                - endDate
+                - hoursPerDay
+                - taskDescription
+              properties:
+                startDate:
+                  type: string
+                  format: date-time
+                endDate:
+                  type: string
+                  format: date-time
+                hoursPerDay:
+                  type: number
+                  example: 8
+                taskDescription:
+                  type: string
+                  example: "Standard Sprint Operations"
+                projectId:
+                  type: string
+                phaseId:
+                  type: string
+                plannedTaskId:
+                  type: string
+      responses:
+        '201':
+          description: Entries created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                    example: 5
+
+  /api/entries/bulk:
+    post:
+      summary: Bulk Create Time Entries
+      description: Logs a batch of time entries in one request.
+      tags:
+        - Time Entries
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - entries
+              properties:
+                entries:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      hours:
+                        type: number
+                      taskDescription:
+                        type: string
+                      date:
+                        type: string
+                        format: date-time
+                      projectId:
+                        type: string
+                      phaseId:
+                        type: string
+                      plannedTaskId:
+                        type: string
+      responses:
+        '201':
+          description: Bulk entries created
+
+  /api/entries/{id}:
+    put:
+      summary: Update Time Entry
+      description: Updates details of a time entry. User can only edit draft logs.
+      tags:
+        - Time Entries
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                hours:
+                  type: number
+                taskDescription:
+                  type: string
+                date:
+                  type: string
+                  format: date-time
+                projectId:
+                  type: string
+                phaseId:
+                  type: string
+                plannedTaskId:
+                  type: string
+      responses:
+        '200':
+          description: Successfully updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TimeEntry'
+        '400':
+          description: Request body invalid or entry cannot be modified
+        '404':
+          description: Time entry not found
+    delete:
+      summary: Delete Time Entry
+      description: Removes a draft time entry.
+      tags:
+        - Time Entries
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Time entry deleted successfully
+        '400':
+          description: Cannot delete non-draft entries
+        '404':
+          description: Time entry not found
+
+  /api/entries/bulk-status:
+    post:
+      summary: Bulk Update Time Entry Status
+      description: Updates multiple time entries (e.g. submit draft entries for approval).
+      tags:
+        - Time Entries
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - ids
+                - status
+              properties:
+                ids:
+                  type: array
+                  items:
+                    type: string
+                status:
+                  type: string
+                  enum: [DRAFT, SUBMITTED, APPROVED, REJECTED]
+      responses:
+        '200':
+          description: Bulk status updated successfully
+
+  /api/entries/summary/drafts:
+    get:
+      summary: Summarize Draft Hours
+      description: Returns sum of draft log hours for current week.
+      tags:
+        - Time Entries
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful summary retrieval
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  totalDraftHours:
+                    type: number
+                    example: 12.5
+
+  /api/projects:
+    get:
+      summary: List Client Projects
+      description: Returns all projects scoped to the user's organization.
+      tags:
+        - Projects
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Project'
+    post:
+      summary: Create Project
+      description: Creates a new project in the caller's organization.
+      tags:
+        - Projects
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  type: string
+                  example: Stitch Dashboard
+                color:
+                  type: string
+                  example: '#3b82f6'
+      responses:
+        '201':
+          description: Project created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+
+  /api/projects/{id}:
+    get:
+      summary: Get Project Details
+      description: Fetches detailed configuration of a specific project.
+      tags:
+        - Projects
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success
+        '404':
+          description: Project not found
+    put:
+      summary: Update Project
+      description: Updates a project's name or color accent.
+      tags:
+        - Projects
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                color:
+                  type: string
+      responses:
+        '200':
+          description: Updated
+    delete:
+      summary: Delete Project
+      description: Deletes a project along with its phases and plan allocations.
+      tags:
+        - Projects
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Deleted
+
+  /api/projects/{id}/stats:
+    get:
+      summary: Project Progress Statistics
+      description: Calculates plan versus actual logged hour statistics.
+      tags:
+        - Projects
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Returns calculations
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  plannedHours:
+                    type: number
+                  actualHours:
+                    type: number
+                  progressRate:
+                    type: number
+
+  /api/phases:
+    get:
+      summary: List Project Phases
+      description: Retrieves all project phases configured for the organization.
+      tags:
+        - Phases
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Success
+    post:
+      summary: Create Phase
+      description: Adds a new phase (e.g., QA, Design) for a project. Requires Admin.
+      tags:
+        - Phases
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - projectId
+              properties:
+                name:
+                  type: string
+                  example: Phase 1 - Architecture
+                projectId:
+                  type: string
+      responses:
+        '201':
+          description: Phase created
+
+  /api/phases/{id}:
+    put:
+      summary: Update Phase
+      description: Modifies a phase name. Requires Admin.
+      tags:
+        - Phases
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  type: string
+      responses:
+        '200':
+          description: Success
+    delete:
+      summary: Delete Phase
+      description: Removes a phase. Requires Admin.
+      tags:
+        - Phases
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Deleted
+
+  /api/plans:
+    get:
+      summary: List Planned Tasks (WBS)
+      description: Queries planned scheduling assignments. Filters by project or phase.
+      tags:
+        - Plans (WBS)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: projectId
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: phaseId
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success
+    post:
+      summary: Create Planned Task
+      description: Schedules a new task under the WBS structure.
+      tags:
+        - Plans (WBS)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - assigneeId
+                - taskDescription
+                - plannedHours
+              properties:
+                assigneeId:
+                  type: string
+                taskDescription:
+                  type: string
+                plannedHours:
+                  type: number
+                projectId:
+                  type: string
+                phaseId:
+                  type: string
+                parentId:
+                  type: string
+                startDate:
+                  type: string
+                  format: date-time
+                endDate:
+                  type: string
+                  format: date-time
+      responses:
+        '201':
+          description: Task planned successfully
+
+  /api/plans/{id}:
+    put:
+      summary: Update Planned Task
+      description: Modifies scheduled task specifications.
+      tags:
+        - Plans (WBS)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Updated
+    delete:
+      summary: Delete Planned Task
+      description: Removes task allocation from WBS.
+      tags:
+        - Plans (WBS)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Deleted
+
+  /api/plans/upload:
+    post:
+      summary: Upload WBS Template
+      description: Imports multiple tasks into the WBS using an Excel spreadsheet.
+      tags:
+        - Plans (WBS)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                projectId:
+                  type: string
+                phaseId:
+                  type: string
+      responses:
+        '200':
+          description: Successfully imported WBS tasks
+
+  /api/plans/template:
+    get:
+      summary: Download WBS Excel Template
+      description: Downloads the structured empty Excel spreadsheet required for bulk task planning.
+      tags:
+        - Plans (WBS)
+      responses:
+        '200':
+          description: Excel stream attachment
+          content:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema:
+                type: string
+                format: binary
+
+  /api/plans/users:
+    get:
+      summary: List Assignable Users
+      description: Retrieves a filtered team list of users that can receive task allocations.
+      tags:
+        - Plans (WBS)
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Success
+
+  /api/wbs-gantt/{projectId}:
+    get:
+      summary: Fetch Gantt WBS Tree
+      description: Gets a structured parent-child task hierarchy for a specific project.
+      tags:
+        - WBS Gantt
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Gantt WBS tree structure
+
+  /api/reports/capacity:
+    get:
+      summary: Capacity Analysis Heatmap Data
+      description: Computes logged and allocated hour density across a range of calendar days.
+      tags:
+        - Reports
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: startDate
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Day-by-day capacity breakdown
+
+  /api/reports/forecasting:
+    get:
+      summary: Resource Cost Forecasting
+      description: Project future costs based on planning hours and default resource hourly billing.
+      tags:
+        - Reports
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Forecast matrices
+
+  /api/admin/users:
+    get:
+      summary: List Org Users (Admin View)
+      description: Returns detailed compliance list of organization users. Requires Admin.
+      tags:
+        - Admin
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Success
+
+  /api/admin/entries:
+    get:
+      summary: List All Org Time Entries
+      description: Admin compliance view of all organization logs. Requires Admin.
+      tags:
+        - Admin
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Success
+    post:
+      summary: Admin Log Time on Behalf
+      description: Allows administrators to register logs directly for other users. Requires Admin.
+      tags:
+        - Admin
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - userId
+                - hours
+                - taskDescription
+                - date
+              properties:
+                userId:
+                  type: string
+                hours:
+                  type: number
+                taskDescription:
+                  type: string
+                date:
+                  type: string
+                  format: date-time
+      responses:
+        '201':
+          description: Created
+
+  /api/admin/entries/{id}:
+    patch:
+      summary: Approve / Reject Time Entry
+      description: Resolves status transitions of time entries (APPROVED, REJECTED, etc.). Requires Admin.
+      tags:
+        - Admin
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - status
+              properties:
+                status:
+                  type: string
+                  enum: [APPROVED, REJECTED]
+      responses:
+        '200':
+          description: Action resolved successfully
+
+  /api/admin/audit-logs:
+    get:
+      summary: View System Audit Trail
+      description: Queries the database system modifications logs for compliance tracing. Requires Admin.
+      tags:
+        - Admin
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Success
+
+  /api/admin/status:
+    get:
+      summary: Check System Health & Lockouts
+      description: Real-time memory, database reachability, system uptime, active rate limiter lockouts, and recent security events. Requires Super Admin / Admin.
+      tags:
+        - Admin Status
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Detailed monitoring payload
+        '403':
+          description: Forbidden (Requires Admin)
+
+  /api/admin/status/unlock:
+    post:
+      summary: Manually Unlock User Account
+      description: Resets rate-limiter block counter for a locked user email. Requires Super Admin / Admin.
+      tags:
+        - Admin Status
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+              properties:
+                email:
+                  type: string
+                  format: email
+      responses:
+        '200':
+          description: Successfully unlocked
+        '400':
+          description: Email missing
+
+  /api/team:
+    get:
+      summary: List Team Members
+      description: Gets a simplified listing of org coworkers.
+      tags:
+        - Team
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Success
+
+  /api/team/{id}/role:
+    patch:
+      summary: Update Team Member Role
+      description: Elevates/demotes team members. Requires Admin.
+      tags:
+        - Team
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - role
+              properties:
+                role:
+                  type: string
+                  enum: [USER, ADMIN]
+      responses:
+        '200':
+          description: Updated
+
+  /api/team/{id}/manager:
+    patch:
+      summary: Set Coworker Manager
+      description: Links coworker report structure to an administrator. Requires Admin.
+      tags:
+        - Team
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - managerId
+              properties:
+                managerId:
+                  type: string
+      responses:
+        '200':
+          description: Success
+
+  /api/organizations/settings:
+    get:
+      summary: View Org Branding Settings
+      description: Fetches custom header logo configuration and hex brand colors.
+      tags:
+        - Organizations
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Success
+
+    patch:
+      summary: Update Branding Configuration
+      description: Modifies logo pathing or theme hex colors. Requires Admin.
+      tags:
+        - Organizations
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                brandColor:
+                  type: string
+                  example: '#ff5722'
+                logoUrl:
+                  type: string
+      responses:
+        '200':
+          description: Settings updated
+
+  /api/organizations/logo:
+    post:
+      summary: Upload Brand Logo Image
+      description: Saves file to uploads/logos/ and updates settings. Requires Admin.
+      tags:
+        - Organizations
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                logo:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Saved logo pathing
+
+  /api/holidays:
+    get:
+      summary: List Custom Holidays
+      description: Lists organization-specific days off.
+      tags:
+        - Holidays
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Success
+    post:
+      summary: Register Holiday
+      description: Configures custom holiday date off.
+      tags:
+        - Holidays
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - date
+                - name
+              properties:
+                date:
+                  type: string
+                  format: date-time
+                name:
+                  type: string
+                  example: New Year's Day
+      responses:
+        '201':
+          description: Registered
+
+  /api/holidays/{id}:
+    put:
+      summary: Modify Holiday Details
+      description: Adjusts holiday name/date.
+      tags:
+        - Holidays
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Success
+    delete:
+      summary: Delete Holiday configuration
+      description: Removes custom day off configuration.
+      tags:
+        - Holidays
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Deleted
+
+  /api/suggestions/next-task:
+    get:
+      summary: Get Smart Suggestion Next Task
+      description: Analyzes active WBS tasks to suggest the next logical task to log hours against.
+      tags:
+        - Smart Insights
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Suggestion model details
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    TimeEntry:
+      type: object
+      properties:
+        id:
+          type: string
+        hours:
+          type: number
+        taskDescription:
+          type: string
+        date:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [DRAFT, SUBMITTED, APPROVED, REJECTED]
+        userId:
+          type: string
+        projectId:
+          type: string
+        phaseId:
+          type: string
+        plannedTaskId:
+          type: string
+        orgId:
+          type: string
+    Project:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        color:
+          type: string
+        orgId:
+          type: string

@@ -14,6 +14,7 @@ import teamRouter from './routes/team';
 import organizationRouter from './routes/organizations';
 import smartInsightsRouter from './routes/smartInsights';
 import adminStatusRouter from './routes/adminStatus';
+import apiDocsRouter from './routes/apiDocs';
 import { errorHandler } from './middleware/errorHandler';
 
 const app = express();
@@ -44,6 +45,7 @@ app.use('/api/team', teamRouter);
 app.use('/api/organizations', organizationRouter);
 app.use('/api/suggestions', smartInsightsRouter);
 app.use('/api/admin/status', adminStatusRouter);
+app.use('/api-docs', apiDocsRouter);
 
 app.use(errorHandler);
 

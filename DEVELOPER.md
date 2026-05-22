@@ -124,18 +124,23 @@ npm run test
 *Note: `--fileParallelism=false` is enforced in the package.json test script because SQLite is a file-based database. Concurrent tests attempting writes on the same SQLite file will trigger database lock collisions.*
 
 ### 4.2 Test Suite Matrix
-The codebase contains 11 dedicated test suites under `/tests/`:
-1. **`setup.ts`**: Utilities to set up temporary test organizations/users and drop database tables between tests.
-2. **`system_invariants.test.ts`**: Verifies database reachability, environment configurations, and model read/write.
-3. **`health.test.ts`**: Confirms basic API service status endpoints respond.
-4. **`auth.test.ts`**: Validates registration, user login, token issuance, and password security.
-5. **`team.test.ts`**: Tests reporting structure manager relations and bulk registration features.
-6. **`projects.test.ts`**: Tests CRUD operations for client projects.
-7. **`plans.test.ts`**: Validates Work Breakdown Structure allocations and scheduling constraints.
-8. **`api_entries.test.ts`**: Validates standard logging, drafts, and bulk log entry submissions.
-9. **`reports.test.ts`**: Verifies Gantt chart views, plan vs actual calculations, and capacity analytics.
-10. **`admin.test.ts`**: Tests multi-tenant isolation, branding configuration updates, and admin permissions.
-11. **`audit.test.ts`**: Ensures database state modifications correctly log to the `AuditLog` table.
+The codebase contains 16 dedicated test suite files under `/tests/`:
+1. **`setup.ts`**: Global configuration, test DB seeding helper, and clean setup operations.
+2. **`system_invariants.test.ts`**: Verifies database connectivity and essential read/write routines.
+3. **`health.test.ts`**: Validates health check endpoints.
+4. **`auth.test.ts`**: Verifies signups, logins, tokens, and general credential verification.
+5. **`team.test.ts`**: Checks managers, user hierarchies, and roster grids.
+6. **`projects.test.ts`**: Validates project create/read/update/delete operations.
+7. **`plans.test.ts`**: Validates Gantt chart plans and planning schedule entries.
+8. **`api_entries.test.ts`**: Asserts time entry log submissions, drafts, and bulk submissions.
+9. **`reports.test.ts`**: Validates capacity heatmaps, calculations, and allocations.
+10. **`admin.test.ts`**: Validates tenant isolation and settings overrides.
+11. **`audit.test.ts`**: Asserts change event records inside database tables.
+12. **`ids.test.ts`**: Checks that the Intrusion Detection System successfully intercepts malicious payloads.
+13. **`rateLimiter.test.ts`**: Asserts lockout counters and login attempts.
+14. **`security.test.ts`**: Confirms strength requirements on user credentials.
+15. **`adminStatus.test.ts`**: Tests system metrics, locks, unlocks, and Super Admin panel routes.
+16. **`suggestions.test.ts`**: Tests the recommendation matrix for smart task log suggest.
 
 ---
 
@@ -174,3 +179,31 @@ When making modifications to Aion, perform these manual verification scenarios t
 1. **Action**: Log in as `superadmin@example.com` or `admin@stitch.com`. Go to Admin Settings. Update the primary brand color to `#ff5722` (orange) and upload a company logo. Log out.
 2. **Expected UI Behavior**: The login page background glows and button accent colors adapt immediately to the custom orange styling. The logo changes in the navigation header.
 3. **Database Assertion**: Verify `AuditLog` table registers a row with `entityType="Organization"`, `action="UPDATE"`, and details the `oldValues` and `newValues`.
+
+---
+
+## 🛡️ 6. Security, Performance & API Docs Architecture
+
+### 6.1 Intrusion Detection System (IDS)
+The IDS middleware (`src/middleware/intrusionDetection.ts`) globally scans incoming HTTP requests for malicious signatures. It blocks:
+- **SQL Injection**: Input matching patterns like `UNION SELECT`, `OR 1=1`, or command chainings.
+- **Directory Traversal**: Paths containing `../` or `/etc/passwd`.
+If triggered, the middleware logs a security event in the `AuditLog` table with `entityType="SECURITY"` and responds with HTTP `400 Bad Request`.
+
+### 6.2 Rate-Limiting Lockouts
+Brute-force protection is enforced by `loginRateLimiter` (`src/utils/rateLimiter.ts`):
+- Tracks failed login counts per email in volatile memory.
+- Triggers a **15-minute lockout** after 5 consecutive failures.
+- Super Admins can monitor active lockouts and manually clear them in real-time from the System Monitor.
+
+### 6.3 Performance Optimization Caching
+An in-memory cache helper (`src/utils/cache.ts`) optimizes frequent read queries:
+- Cache gets populated during query actions (e.g. `TimeEntryService.listEntries`).
+- Cached records are automatically invalidated on write/delete/update operations.
+
+### 6.4 API Documentation
+Interactive API docs are exposed at `/api-docs` using Swagger UI.
+- The router (`src/routes/apiDocs.ts`) reads from `docs/openapi.yaml`.
+- All request parameters, headers, schemas, and response formats are detailed inside this YAML specification.
+- Developers adding new endpoints must append the corresponding paths to the OpenAPI specification.
+
