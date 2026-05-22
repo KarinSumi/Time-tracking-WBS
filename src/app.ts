@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import bodyParser from 'body-parser';
+import helmet from 'helmet';
 import entriesRouter from './routes/entries';
 import authRouter from './routes/auth';
 import projectsRouter from './routes/projects';
@@ -18,6 +19,18 @@ import apiDocsRouter from './routes/apiDocs';
 import { errorHandler } from './middleware/errorHandler';
 
 const app = express();
+
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'"],
+      connectSrc: ["'self'", "ws:"],
+      imgSrc: ["'self'", "data:", "https:"]
+    }
+  },
+  hsts: { maxAge: 31536000 }
+}));
 
 app.use(cors({
   origin: ['http://localhost:5173', 'http://localhost:3000'],
