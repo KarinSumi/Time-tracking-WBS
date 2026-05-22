@@ -13,6 +13,7 @@ import holidaysRouter from './routes/holidays';
 import teamRouter from './routes/team';
 import organizationRouter from './routes/organizations';
 import smartInsightsRouter from './routes/smartInsights';
+import adminStatusRouter from './routes/adminStatus';
 import { errorHandler } from './middleware/errorHandler';
 
 const app = express();
@@ -23,6 +24,9 @@ app.use(cors({
 }));
 
 app.use(bodyParser.json());
+import { intrusionDetection } from './middleware/intrusionDetection';
+app.use(intrusionDetection);
+
 app.use('/uploads', express.static('uploads'));
 
 app.get('/health', (req, res) => { res.sendStatus(200); });
@@ -39,6 +43,7 @@ app.use('/api/holidays', holidaysRouter);
 app.use('/api/team', teamRouter);
 app.use('/api/organizations', organizationRouter);
 app.use('/api/suggestions', smartInsightsRouter);
+app.use('/api/admin/status', adminStatusRouter);
 
 app.use(errorHandler);
 

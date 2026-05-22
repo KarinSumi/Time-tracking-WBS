@@ -1,0 +1,17 @@
+#!/bin/sh
+
+# Get current git user details
+USER_NAME=$(git config user.name)
+USER_EMAIL=$(git config user.email)
+
+# Check if the user matches KarinSumi or kr19m1168@gmail.com
+if [ "$USER_NAME" != "KarinSumi" ] && [ "$USER_EMAIL" != "kr19m1168@gmail.com" ]; then
+    echo "=========================================================="
+    echo "ERROR: Pushes are restricted to repository owner KarinSumi."
+    echo "Your configured identity is:"
+    echo "  Name:  $USER_NAME"
+    echo "  Email: $USER_EMAIL"
+    echo "Please contact kr19m1168@gmail.com for authorization."
+    echo "=========================================================="
+    exit 1
+fi

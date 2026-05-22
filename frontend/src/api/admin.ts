@@ -10,3 +10,5 @@ export const updateAdminEntry = (id: string, data: any) => apiFetch<TimeEntry>(`
 export const createAdminEntry = (data: any) => apiFetch<TimeEntry>('/admin/entries', { method: 'POST', body: JSON.stringify(data) });
 export const uploadAdminEntries = (formData: FormData) => apiFetch<{ created: number; errors: number }>('/admin/entries/upload', { method: 'POST', body: formData });
 export const getAuditLogs = () => apiFetch<AuditLog[]>('/admin/audit-logs');
+export const getAdminStatus = () => apiFetch<any>('/admin/status');
+export const unlockAdminAccount = (email: string) => apiFetch<{ success: boolean; message: string }>('/admin/status/unlock', { method: 'POST', body: JSON.stringify({ email }) });

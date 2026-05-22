@@ -27,6 +27,21 @@ class LoginRateLimiter {
   public reset(email: string): void {
     this.attempts.delete(email);
   }
+
+  public getActiveLockouts(): { email: string; lockUntil: Date; remainingMs: number }[] {
+    const lockouts: { email: string; lockUntil: Date; remainingMs: number }[] = [];
+    const now = new Date();
+    for (const [email, attempt] of this.attempts.entries()) {
+      if (attempt.lockUntil && attempt.lockUntil > now) {
+        lockouts.push({
+          email,
+          lockUntil: attempt.lockUntil,
+          remainingMs: attempt.lockUntil.getTime() - now.getTime()
+        });
+      }
+    }
+    return lockouts;
+  }
 }
 
 export const loginRateLimiter = new LoginRateLimiter();

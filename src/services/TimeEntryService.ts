@@ -1,4 +1,5 @@
 import prisma from '../lib/prisma';
+import { entryCache } from '../utils/cache';
 import { TimeEntry } from '@prisma/client';
 import { createAuditLog } from '../utils/utils';
 
@@ -9,6 +10,27 @@ export interface UserContext {
 }
 
 export async function listEntries(filters: any, context: UserContext) {
+  // Pagination defaults
+  const page = parseInt(filters.page) || 1;
+  const limit = parseInt(filters.limit) || 50;
+  const skip = (page - 1) * limit;
+
+  // Build cache key based on user and filters (excluding pagination params)
+  const cacheKey = `listEntries:${context.role}:${context.userId || ''}:${context.orgId || ''}:${JSON.stringify({
+    status: filters.status,
+    projectId: filters.projectId,
+    userId: filters.userId,
+    startDate: filters.startDate,
+    endDate: filters.endDate,
+  })}`;
+
+  // Attempt to retrieve from cache
+  const cached = entryCache.get(cacheKey);
+  if (cached) {
+    // Return the appropriate slice for pagination
+    return cached.slice(skip, skip + limit);
+  }
+
   const where: any = {};
 
   if (context.role === 'USER') {
@@ -27,7 +49,7 @@ export async function listEntries(filters: any, context: UserContext) {
     if (filters.endDate) where.date.lte = new Date(filters.endDate);
   }
 
-  return await prisma.timeEntry.findMany({
+  const entries = await prisma.timeEntry.findMany({
     where,
     include: {
       user: { select: { name: true, avatarUrl: true, email: true } },
@@ -36,6 +58,12 @@ export async function listEntries(filters: any, context: UserContext) {
     },
     orderBy: { date: 'desc' },
   });
+
+  // Store full result set in cache
+  entryCache.set(cacheKey, entries);
+
+  // Return paginated slice
+  return entries.slice(skip, skip + limit);
 }
 
 export async function createEntry(data: any, userId: string) {
