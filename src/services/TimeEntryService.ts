@@ -130,6 +130,8 @@ export async function createEntry(data: any, userId: string) {
     newValues: data as any,
   });
 
+  entryCache.clear();
+
   return entry;
 }
 
@@ -183,6 +185,8 @@ export async function updateTimeEntry(id: string, data: any, context: UserContex
       newValues: newEntry as any,
     });
 
+    entryCache.clear();
+
     return newEntry;
   });
 }
@@ -211,6 +215,8 @@ export async function deleteTimeEntry(id: string, context: UserContext) {
       performedBy: context.userId,
       oldValues: entry as any,
     });
+
+    entryCache.clear();
   });
 }
 
@@ -289,6 +295,9 @@ export async function createMultiDayEntries(data: any, userId: string) {
 
       results.push(entry);
     }
+
+    entryCache.clear();
+
     return results;
   });
 }
@@ -350,6 +359,9 @@ export async function createBulkEntries(entries: any[], userId: string) {
 
       createdEntries.push(entry);
     }
+
+    entryCache.clear();
+
     return createdEntries;
   });
 }
@@ -383,6 +395,8 @@ export async function updateBulkStatus(ids: string[], status: string, context: U
       performedBy: context.userId,
       newValues: { ids: validIds, status } as any,
     });
+
+    entryCache.clear();
 
     return result;
   });

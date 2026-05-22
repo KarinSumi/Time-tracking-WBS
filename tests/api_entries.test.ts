@@ -82,4 +82,34 @@ describe('Time Entries API', () => {
 
     expect(delRes.status).toBe(403);
   });
+
+  it('should invalidate cache on new entry creation so it appears immediately', async () => {
+    const { token, user } = await createTestUser();
+
+    // 1. Initial list (populates cache)
+    const res1 = await request(app)
+      .get('/api/entries')
+      .set('Authorization', `Bearer ${token}`);
+    expect(res1.status).toBe(200);
+    expect(res1.body.length).toBe(0);
+
+    // 2. Create a new entry (should trigger cache invalidation)
+    const createRes = await request(app)
+      .post('/api/entries')
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        hours: 6,
+        taskDescription: 'Testing Cache Invalidation',
+        date: new Date().toISOString()
+      });
+    expect(createRes.status).toBe(201);
+
+    // 3. Immediately list again and assert the entry is returned
+    const res2 = await request(app)
+      .get('/api/entries')
+      .set('Authorization', `Bearer ${token}`);
+    expect(res2.status).toBe(200);
+    expect(res2.body.length).toBe(1);
+    expect(res2.body[0].taskDescription).toBe('Testing Cache Invalidation');
+  });
 });
