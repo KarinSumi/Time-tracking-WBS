@@ -17,6 +17,7 @@ import smartInsightsRouter from './routes/smartInsights';
 import adminStatusRouter from './routes/adminStatus';
 import apiDocsRouter from './routes/apiDocs';
 import { errorHandler } from './middleware/errorHandler';
+import { maintenanceMiddleware } from './middleware/maintenance';
 
 const app = express();
 
@@ -38,6 +39,7 @@ app.use(cors({
 }));
 
 app.use(bodyParser.json());
+app.use(maintenanceMiddleware);
 import { intrusionDetection } from './middleware/intrusionDetection';
 app.use(intrusionDetection);
 
