@@ -45,6 +45,8 @@ describe('Admin Status API', () => {
     expect(res.status).toBe(200);
     expect(res.body.status).toBe('healthy');
     expect(res.body.database.status).toBe('UP');
+    expect(res.body.database.latencyMs).toBeTypeOf('number');
+    expect(res.body.database.latencyMs).toBeGreaterThanOrEqual(0);
     expect(res.body.system.uptime).toBeGreaterThan(0);
     expect(res.body.system.memory).toBeDefined();
     expect(res.body.securityEvents.length).toBe(1);

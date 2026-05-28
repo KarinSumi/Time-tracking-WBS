@@ -15,9 +15,12 @@ router.get('/', authMiddleware, async (req: AuthRequest, res) => {
     }
 
     let dbStatus = 'UP';
+    let dbLatencyMs = 0;
     try {
+      const start = Date.now();
       // Simple raw query to check database connection
       await prisma.$queryRaw`SELECT 1`;
+      dbLatencyMs = Date.now() - start;
     } catch (e) {
       dbStatus = 'DOWN';
     }
@@ -41,7 +44,8 @@ router.get('/', authMiddleware, async (req: AuthRequest, res) => {
     res.json({
       status: dbStatus === 'UP' ? 'healthy' : 'unhealthy',
       database: {
-        status: dbStatus
+        status: dbStatus,
+        latencyMs: dbLatencyMs
       },
       system: {
         uptime,
