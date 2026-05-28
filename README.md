@@ -194,14 +194,19 @@ Track team capacity, over-allocation, and utilization.
 
 ---
 
-### 8. Superadmin Config & Branding (Super Admins)
-Customize logos and branding accents organization-wide.
+### 8. Superadmin Config, Monitoring & Auto-Updates (Super Admins)
+Customize logos, monitor system health, and deploy updates organization-wide.
 
 ![Superadmin Customization](frontend/public/tutorial/assets/08_superadmin_config.webp)
 
-#### Steps to replicate:
+#### Branding Customization:
 1. Log in as a **Super Admin** or authorized Administrator and navigate to the **Admin** settings.
 2. Locate the **Branding Customization** panel.
 3. Set your preferred corporate theme color hex code (e.g., `#ff5722` for orange).
 4. Upload your company's **Logo** image file.
 5. Click **Save Customization** and observe the header logo and theme colors update instantly.
+
+#### System Monitor & Auto-Updates:
+1. Click the **System Monitor** tab to view real-time server health, database status, memory usage, active brute-force lockouts, and security IDS logs.
+2. Click the **Redeploy Server** button to trigger a fully automated `git pull`, build, and application restart.
+3. The platform will enter **Maintenance Mode** for all users, display a loading screen, and seamlessly auto-reload once the server is back online.
