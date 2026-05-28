@@ -18,9 +18,11 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "@playwright/test": "^1.45.0",
     "@prisma/client": "^6.2.1",
     "bcryptjs": "^3.0.3",
     "body-parser": "^2.2.2",
+    "chrome-devtools-mcp": "^0.6.0",
     "cors": "^2.8.6",
     "date-fns": "^4.1.0",
     "express": "^5.2.1",
