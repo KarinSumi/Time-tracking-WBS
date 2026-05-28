@@ -576,7 +576,7 @@ const SuperAdminTable: React.FC = () => {
                 <div className="flex-1 overflow-auto bg-[#0d0f17] rounded-lg border border-white/5 p-4 font-mono text-xs space-y-3 scrollbar-thin">
                   {systemMetrics?.securityEvents && systemMetrics.securityEvents.length > 0 ? (
                     systemMetrics.securityEvents.map((evt: any) => {
-                      const isThreat = evt.action === 'IDS_SQLI_ATTEMPT' || evt.action === 'IDS_TRAVERSAL_ATTEMPT' || evt.action === 'ACCOUNT_LOCKOUT';
+                      const isThreat = evt.action === 'INTRUSION_ALERT' || evt.action === 'BRUTE_FORCE_LOCKOUT';
                       return (
                         <div key={evt.id} className={`p-2 rounded border transition-colors ${isThreat ? 'bg-red-950/20 border-red-500/20 text-red-300' : 'bg-white/[0.02] border-white/5 text-white/70'}`}>
                           <div className="flex justify-between font-semibold mb-1">
