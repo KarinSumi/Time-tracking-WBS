@@ -207,3 +207,8 @@ Interactive API docs are exposed at `/api-docs` using Swagger UI.
 - All request parameters, headers, schemas, and response formats are detailed inside this YAML specification.
 - Developers adding new endpoints must append the corresponding paths to the OpenAPI specification.
 
+### 6.5 System Maintenance & Auto-Updates
+The platform features an automated redeployment workflow designed for zero-downtime perceptions:
+- **Maintenance Middleware**: `src/middleware/maintenance.ts` checks for a `.maintenance` file on disk. If present, it intercepts all non-admin traffic with an HTTP 503 response.
+- **Frontend Interceptor**: The Axios client catches 503 errors and emits a `maintenance_mode` event, prompting `App.tsx` to mount a full-screen loading overlay. It polls the backend `/health` endpoint and automatically reloads the page once it receives a 200 OK.
+- **Redeploy Script**: The `POST /api/admin/status/upgrade` route spawns a detached shell script (`scripts/redeploy.sh`) which disconnects from the parent Node process, executes `git pull`, rebuilds assets, migrates the database, removes the `.maintenance` lock, and calls PM2 to restart the app.

@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.5.0] - 2026-05-28
+### Added
+- **System Redeployment Workflow**: One-click "Redeploy Server" button in the Super Admin dashboard to pull latest code and restart via PM2.
+- **Global Maintenance Mode**: Middleware lock preventing traffic during server upgrades, paired with a React frontend interceptor that shows a loading overlay and automatically reloads the app when the server recovers.
+- Security audit review markdown artifact (`security_review.md`).
+- Updates to all multilingual READMEs reflecting the new architecture workflows.
+
+---
+
 ## [1.4.0] - 2026-05-22
 ### Added
 - Interactive API documentation using Swagger UI at `/api-docs` via `openapi.yaml` configuration.
