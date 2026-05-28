@@ -57,40 +57,26 @@ export const intrusionDetection = async (req: Request & { userId?: string }, res
   for (const check of checks) {
     const result = checkObject(check.val);
     if (result) {
-      let performedBy = req.userId;
-      if (!performedBy) {
-        try {
-          const user = await prisma.user.findFirst({ select: { id: true } });
-          if (user) {
-            performedBy = user.id;
-          }
-        } catch (e) {
-          // ignore db fetch errors during intrusion detection
-        }
-      }
+      let performedBy = req.userId || null;
 
-      if (performedBy) {
-        try {
-          await prisma.auditLog.create({
-            data: {
-              entityType: 'SECURITY',
-              entityId: 'INTRUSION',
-              action: 'INTRUSION_ALERT',
-              performedBy,
-              newValues: {
-                type: result.type,
-                location: check.name,
-                offendingValue: result.value,
-                path: req.path,
-                ip: req.ip || req.socket.remoteAddress
-              }
+      try {
+        await prisma.auditLog.create({
+          data: {
+            entityType: 'SECURITY',
+            entityId: 'INTRUSION',
+            action: 'INTRUSION_ALERT',
+            performedBy,
+            newValues: {
+              type: result.type,
+              location: check.name,
+              offendingValue: result.value,
+              path: req.path,
+              ip: req.ip || req.socket.remoteAddress
             }
-          });
-        } catch (e) {
-          console.error('Failed to create intrusion alert audit log:', e);
-        }
-      } else {
-        console.warn('Intrusion detected, but no user found in database to link the audit log.');
+          }
+        });
+      } catch (e) {
+        console.error('Failed to create intrusion alert audit log:', e);
       }
 
       res.status(400).json({ error: 'Malicious payload detected' });

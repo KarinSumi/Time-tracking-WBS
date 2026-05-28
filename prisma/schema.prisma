@@ -123,11 +123,11 @@ model AuditLog {
   entityType  String
   entityId    String
   action      String
-  performedBy String
+  performedBy String?
   oldValues   Json?
   newValues   Json?
   timestamp   DateTime @default(now())
-  user        User     @relation(fields: [performedBy], references: [id])
+  user        User?    @relation(fields: [performedBy], references: [id])
   @@index([performedBy])
 }
 
