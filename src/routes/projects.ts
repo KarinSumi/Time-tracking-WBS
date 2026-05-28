@@ -33,7 +33,7 @@ router.post('/', authMiddleware, validateBody(projectSchema), async (req: AuthRe
 router.put('/:id', authMiddleware, validateParams(idParamSchema), validateBody(projectSchema.partial()), async (req: AuthRequest, res) => {
   try {
     const context = { userId: req.userId!, orgId: req.orgId!, role: req.userRole! };
-    const project = await ProjectService.updateProject(req.params.id, req.body, context);
+    const project = await ProjectService.updateProject((req.params.id as string), req.body, context);
     res.json(project);
   } catch (error: any) {
     res.status(error.message === 'Unauthorized' ? 403 : 404).json({ error: error.message });
@@ -43,7 +43,7 @@ router.put('/:id', authMiddleware, validateParams(idParamSchema), validateBody(p
 router.delete('/:id', authMiddleware, validateParams(idParamSchema), async (req: AuthRequest, res) => {
   try {
     const context = { userId: req.userId!, orgId: req.orgId!, role: req.userRole! };
-    await ProjectService.deleteProject(req.params.id, context);
+    await ProjectService.deleteProject((req.params.id as string), context);
     res.json({ success: true });
   } catch (error: any) {
     res.status(error.message?.includes('Only Super Admins') ? 403 : 404).json({ error: error.message });
@@ -52,7 +52,7 @@ router.delete('/:id', authMiddleware, validateParams(idParamSchema), async (req:
 
 router.get('/:id', authMiddleware, validateParams(idParamSchema), async (req: AuthRequest, res) => {
   try {
-    const project = await ProjectService.getProject(req.params.id, req.orgId!);
+    const project = await ProjectService.getProject((req.params.id as string), req.orgId!);
     res.json(project);
   } catch (error: any) {
     res.status(404).json({ error: error.message });
@@ -61,7 +61,7 @@ router.get('/:id', authMiddleware, validateParams(idParamSchema), async (req: Au
 
 router.get('/:id/stats', authMiddleware, validateParams(idParamSchema), async (req: AuthRequest, res) => {
   try {
-    const stats = await ProjectService.getProjectStats(req.params.id, req.orgId!);
+    const stats = await ProjectService.getProjectStats((req.params.id as string), req.orgId!);
     res.json(stats);
   } catch (error: any) {
     res.status(404).json({ error: error.message });

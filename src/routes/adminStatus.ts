@@ -2,6 +2,9 @@ import express from 'express';
 import type { AuthRequest } from '../middleware/auth';
 import { authMiddleware } from '../middleware/auth';
 import prisma from '../lib/prisma';
+import { spawn } from 'child_process';
+import fs from 'fs';
+import path from 'path';
 import { loginRateLimiter } from '../utils/rateLimiter';
 
 const router = express.Router();
@@ -89,6 +92,29 @@ router.post('/unlock', authMiddleware, async (req: AuthRequest, res) => {
     res.json({ success: true, message: `Account ${email} has been unlocked.` });
   } catch (error: any) {
     res.status(500).json({ error: error.message || 'Failed to unlock account' });
+  }
+});
+
+router.post('/upgrade', authMiddleware, async (req: AuthRequest, res) => {
+  try {
+    if (req.userRole !== 'SUPER_ADMIN' && req.userRole !== 'ADMIN') {
+      res.status(403).json({ error: 'Access forbidden: Administrator privilege required' });
+      return;
+    }
+
+    const maintFile = path.join(process.cwd(), '.maintenance');
+    fs.writeFileSync(maintFile, 'true');
+
+    const scriptPath = path.join(process.cwd(), 'scripts/redeploy.sh');
+    const child = spawn('bash', [scriptPath], {
+      detached: true,
+      stdio: 'ignore'
+    });
+    child.unref();
+
+    res.json({ success: true, message: 'System upgrade initiated. Entering maintenance mode.' });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message || 'Failed to trigger system upgrade' });
   }
 });
 

@@ -22,7 +22,7 @@ router.patch('/:id/role', requireAdmin, validateParams(idParamSchema), async (re
   try {
     const { id } = req.params;
     const { role } = req.body;
-    const updated = await UserService.updateUserRole(id, role, req.orgId!, req.userId!);
+    const updated = await UserService.updateUserRole(id as string, role, req.orgId!, req.userId!);
     res.json(updated);
   } catch (error: any) {
     res.status(400).json({ error: error.message });
@@ -33,7 +33,7 @@ router.patch('/:id/manager', requireAdmin, validateParams(idParamSchema), async 
   try {
     const { id } = req.params;
     const { managerId } = req.body;
-    const updated = await UserService.updateUserManager(id, managerId, req.orgId!, req.userId!);
+    const updated = await UserService.updateUserManager(id as string, managerId, req.orgId!, req.userId!);
     res.json(updated);
   } catch (error: any) {
     res.status(400).json({ error: error.message });

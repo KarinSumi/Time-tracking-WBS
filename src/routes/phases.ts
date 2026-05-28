@@ -29,7 +29,7 @@ router.post('/', authMiddleware, requireAdmin, async (req: AuthRequest, res) => 
 router.put('/:id', authMiddleware, requireAdmin, validateParams(idParamSchema), async (req: AuthRequest, res) => {
   try {
     const context = { userId: req.userId!, orgId: req.orgId!, role: req.userRole! };
-    const phase = await PhaseService.updatePhase(req.params.id, req.body, context);
+    const phase = await PhaseService.updatePhase((req.params.id as string), req.body, context);
     res.json(phase);
   } catch (error: any) {
     res.status(error.message === 'Unauthorized' ? 403 : 404).json({ error: error.message });
@@ -39,7 +39,7 @@ router.put('/:id', authMiddleware, requireAdmin, validateParams(idParamSchema), 
 router.delete('/:id', authMiddleware, requireAdmin, validateParams(idParamSchema), async (req: AuthRequest, res) => {
   try {
     const context = { userId: req.userId!, orgId: req.orgId!, role: req.userRole! };
-    await PhaseService.deletePhase(req.params.id, context);
+    await PhaseService.deletePhase((req.params.id as string), context);
     res.json({ success: true });
   } catch (error: any) {
     res.status(error.message === 'Unauthorized' ? 403 : 404).json({ error: error.message });

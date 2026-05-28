@@ -12,3 +12,4 @@ export * from './phases';
 export * from './wbs';
 export * from './suggestions';
 
+export * from './health';

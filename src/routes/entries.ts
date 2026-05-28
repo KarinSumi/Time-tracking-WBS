@@ -78,17 +78,21 @@ router.post('/bulk', authMiddleware, validateBody(bulkSchema), async (req: AuthR
 router.put('/:id', authMiddleware, validateParams(idParamSchema), validateBody(timeEntrySchema.partial()), async (req: AuthRequest, res) => {
   try {
     const context = { userId: req.userId!, orgId: req.orgId!, role: req.userRole! };
-    const entry = await TimeEntryService.updateTimeEntry(req.params.id, req.body, context);
+    const entry = await TimeEntryService.updateTimeEntry(req.params.id as string, req.body, context);
     res.json(entry);
-  } catch (error: any) {
-    res.status(error.message === 'Unauthorized' ? 403 : 400).json({ error: error.message });
+  } catch (err: any) {
+    if (err.message === 'Time entry not found' || err.message === 'Not authorized') {
+      res.status(404).json({ error: err.message });
+    } else {
+      res.status(400).json({ error: err.message });
+    }
   }
 });
 
 router.delete('/:id', authMiddleware, validateParams(idParamSchema), async (req: AuthRequest, res) => {
   try {
     const context = { userId: req.userId!, orgId: req.orgId!, role: req.userRole! };
-    await TimeEntryService.deleteTimeEntry(req.params.id, context);
+    await TimeEntryService.deleteTimeEntry(req.params.id as string, context);
     res.json({ success: true });
   } catch (error: any) {
     res.status(error.message === 'Unauthorized' ? 403 : 400).json({ error: error.message });

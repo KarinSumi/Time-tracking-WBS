@@ -44,7 +44,7 @@ router.post('/', authMiddleware, async (req: AuthRequest, res) => {
  */
 router.put('/:id', authMiddleware, validateParams(idParamSchema), async (req: AuthRequest, res) => {
   try {
-    const holiday = await updateHoliday(req.params.id, req.body, { userId: req.userId!, orgId: req.orgId!, role: req.userRole! });
+    const holiday = await updateHoliday((req.params.id as string), req.body, { userId: req.userId!, orgId: req.orgId!, role: req.userRole! });
     res.json(holiday);
   } catch (error: any) {
     console.error('Update holiday error:', error);
@@ -59,7 +59,7 @@ router.put('/:id', authMiddleware, validateParams(idParamSchema), async (req: Au
  */
 router.delete('/:id', authMiddleware, validateParams(idParamSchema), async (req: AuthRequest, res) => {
   try {
-    await deleteHoliday(req.params.id, { userId: req.userId!, orgId: req.orgId!, role: req.userRole! });
+    await deleteHoliday((req.params.id as string), { userId: req.userId!, orgId: req.orgId!, role: req.userRole! });
     res.status(204).send();
   } catch (error: any) {
     console.error('Delete holiday error:', error);

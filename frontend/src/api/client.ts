@@ -21,6 +21,9 @@ instance.interceptors.response.use(
     return response.data;
   },
   (error) => {
+    if (error.response?.status === 503) {
+      window.dispatchEvent(new Event('maintenance_mode'));
+    }
     const message = error.response?.data?.error || error.message || 'Request failed';
     return Promise.reject(new Error(message));
   }

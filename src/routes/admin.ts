@@ -44,7 +44,7 @@ router.get('/entries', async (req: AuthRequest, res) => {
 router.patch('/entries/:id', validateParams(idParamSchema), async (req: AuthRequest, res) => {
   try {
     const context = { userId: req.userId!, orgId: req.orgId!, role: req.userRole! };
-    const updatedEntry = await TimeEntryService.updateTimeEntry(req.params.id, req.body, context);
+    const updatedEntry = await TimeEntryService.updateTimeEntry((req.params.id as string), req.body, context);
     res.json(updatedEntry);
   } catch (error: any) {
     res.status(400).json({ error: error.message });

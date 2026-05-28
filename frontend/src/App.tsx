@@ -20,7 +20,53 @@ import BulkTimeInput from './components/BulkTimeInput';
 
 import './App.css';
 
+import { getHealth } from './api';
+
 function App() {
+  const [isMaintenance, setIsMaintenance] = useState(false);
+
+  useEffect(() => {
+    const handleMaintenance = () => setIsMaintenance(true);
+    window.addEventListener('maintenance_mode', handleMaintenance);
+    return () => window.removeEventListener('maintenance_mode', handleMaintenance);
+  }, []);
+
+  useEffect(() => {
+    if (!isMaintenance) return;
+    
+    const checkHealth = async () => {
+      try {
+        await getHealth();
+        // If we reach here, server is back up (200 OK)
+        window.location.reload();
+      } catch (err: any) {
+        // Still 503 or network error, keep waiting
+      }
+    };
+
+    const intervalId = setInterval(checkHealth, 3000);
+    return () => clearInterval(intervalId);
+  }, [isMaintenance]);
+
+  if (isMaintenance) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen bg-[#0d0f17] text-white">
+        <div className="bg-[#1a1b2a] p-8 rounded-2xl border border-white/10 flex flex-col items-center max-w-md text-center glass-panel">
+          <div className="w-16 h-16 rounded-full bg-purple-500/20 flex items-center justify-center mb-6">
+            <div className="w-8 h-8 border-4 border-[#b184f5] border-t-transparent rounded-full animate-spin" />
+          </div>
+          <h1 className="text-2xl font-bold text-[#b184f5] mb-2">System Updating</h1>
+          <p className="text-white/60 mb-6">
+            The server is currently pulling the latest changes and restarting. Please wait, this page will automatically reload once the update is complete.
+          </p>
+          <p className="text-sm text-white/40 font-mono bg-white/5 px-3 py-1 rounded">
+            Do not close this window
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <>
       <Routes>

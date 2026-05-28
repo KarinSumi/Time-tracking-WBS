@@ -82,4 +82,33 @@ describe('Admin Status API', () => {
     expect(logs.length).toBe(1);
     expect(logs[0].entityId).toBe(emailToLock);
   });
+
+  it('should block non-admins from triggering system upgrade', async () => {
+    const { token } = await createTestUser('USER');
+    const res = await request(app)
+      .post('/api/admin/status/upgrade')
+      .set('Authorization', `Bearer ${token}`);
+    expect(res.status).toBe(403);
+  });
+
+  it('should allow super admin to trigger system upgrade', async () => {
+    const { token } = await createTestUser('SUPER_ADMIN');
+    
+    // Ensure .maintenance does not exist
+    const fs = await import('fs');
+    const path = await import('path');
+    const maintFile = path.join(process.cwd(), '.maintenance');
+    if (fs.existsSync(maintFile)) fs.unlinkSync(maintFile);
+
+    const res = await request(app)
+      .post('/api/admin/status/upgrade')
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.success).toBe(true);
+    expect(fs.existsSync(maintFile)).toBe(true);
+
+    // Cleanup maintenance file
+    if (fs.existsSync(maintFile)) fs.unlinkSync(maintFile);
+  });
 });

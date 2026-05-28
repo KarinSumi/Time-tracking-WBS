@@ -12,3 +12,4 @@ export const uploadAdminEntries = (formData: FormData) => axiosClient.post<{ cre
 export const getAuditLogs = () => axiosClient.get<AuditLog[]>('/admin/audit-logs');
 export const getAdminStatus = () => axiosClient.get<any>('/admin/status');
 export const unlockAdminAccount = (email: string) => axiosClient.post<{ success: boolean; message: string }>('/admin/status/unlock', { email });
+export const triggerSystemUpgrade = () => axiosClient.post<{ message: string }>('/admin/status/upgrade');

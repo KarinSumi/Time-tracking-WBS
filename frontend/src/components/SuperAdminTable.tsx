@@ -42,7 +42,8 @@ import {
   uploadAdminEntries,
   getProjects,
   getAdminStatus,
-  unlockAdminAccount
+  unlockAdminAccount,
+  triggerSystemUpgrade
 } from '../api';
 
 const SuperAdminTable: React.FC = () => {
@@ -61,6 +62,7 @@ const SuperAdminTable: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'grid' | 'monitor'>('grid');
   const [systemMetrics, setSystemMetrics] = useState<any>(null);
   const [isMetricsLoading, setIsMetricsLoading] = useState(false);
+  const [isUpgrading, setIsUpgrading] = useState(false);
 
   // Filters
   const [filterUser, setFilterUser] = useState('');
@@ -131,6 +133,19 @@ const SuperAdminTable: React.FC = () => {
       }
     } catch (err: any) {
       addToast({ type: 'error', title: 'Error', message: err.message || 'Failed to unlock account' });
+    }
+  };
+
+  const handleRedeploy = async () => {
+    if (!window.confirm("Are you sure you want to pull latest code and redeploy the server? This will put the system in maintenance mode.")) return;
+    setIsUpgrading(true);
+    try {
+      await triggerSystemUpgrade();
+      addToast({ type: 'success', title: 'Redeploy Started', message: 'System is entering maintenance mode and will restart shortly.' });
+    } catch (err: any) {
+      addToast({ type: 'error', title: 'Redeploy Failed', message: err.message || 'Could not trigger upgrade.' });
+    } finally {
+      setIsUpgrading(false);
     }
   };
 
@@ -329,6 +344,18 @@ const SuperAdminTable: React.FC = () => {
             )}
           </button>
         </div>
+
+        {activeTab === 'monitor' && (
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={handleRedeploy}
+              disabled={isUpgrading}
+              className="bg-red-500/20 hover:bg-red-500/30 text-red-400 text-sm font-semibold py-1.5 px-4 rounded-lg flex items-center gap-2 transition-all border border-red-500/30"
+            >
+              <Terminal size={16} /> {isUpgrading ? 'Triggering...' : 'Redeploy Server'}
+            </button>
+          </div>
+        )}
 
         {activeTab === 'grid' && (
           <div className="flex items-center gap-3">

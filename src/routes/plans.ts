@@ -32,7 +32,7 @@ router.post('/', authMiddleware, requireFields(['assigneeId', 'taskDescription',
 router.put('/:id', authMiddleware, validateParams(idParamSchema), async (req: AuthRequest, res) => {
   try {
     const context = { userId: req.userId!, orgId: req.orgId!, role: req.userRole! };
-    const plan = await PlannedTaskService.updatePlan(req.params.id, req.body, context);
+    const plan = await PlannedTaskService.updatePlan((req.params.id as string), req.body, context);
     res.json(plan);
   } catch (error: any) {
     res.status(error.message === 'Unauthorized' ? 403 : 404).json({ error: error.message });
@@ -42,7 +42,7 @@ router.put('/:id', authMiddleware, validateParams(idParamSchema), async (req: Au
 router.delete('/:id', authMiddleware, validateParams(idParamSchema), async (req: AuthRequest, res) => {
   try {
     const context = { userId: req.userId!, orgId: req.orgId!, role: req.userRole! };
-    await PlannedTaskService.deletePlan(req.params.id, context);
+    await PlannedTaskService.deletePlan((req.params.id as string), context);
     res.json({ success: true });
   } catch (error: any) {
     res.status(error.message === 'Unauthorized' ? 403 : 404).json({ error: error.message });
